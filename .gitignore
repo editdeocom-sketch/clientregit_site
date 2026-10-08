@@ -1,0 +1,14 @@
+node_modules
+dist
+.env
+.vercel
+*.local
+
+.vercel
+.env*
+public/downloads/*.exe
+dev.log
+dev.err
+
+*.log
+*.err
