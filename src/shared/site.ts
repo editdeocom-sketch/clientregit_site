@@ -5,6 +5,9 @@ export const SITE = {
   address: 'ClientRegit, India'
 } as const
 
+/** Current desktop app version (keep in sync with the app repo). */
+export const APP_VERSION = '1.0.1'
+
 const RELEASE = 'https://github.com/editdeocom-sketch/clientregit/releases'
 
 export const DOWNLOADS = {

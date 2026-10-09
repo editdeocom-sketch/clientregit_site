@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useCurrency } from '@/lib/currency'
 import { useSession } from '@/lib/auth'
-import { SITE } from '@shared/site'
+import { DOWNLOADS, SITE } from '@shared/site'
 import { supabaseConfigured } from '@/lib/supabase'
 
 function scrollToId(id: string): void {
@@ -93,23 +93,53 @@ export function SiteLayout(): ReactNode {
       </main>
 
       <footer className="border-t border-line bg-surface">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 text-sm text-muted md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-2.5">
-            <img src="/logo-emblem.png" alt="" className="h-6 w-6 object-contain" />
-            <span>
-              © {new Date().getFullYear()} {SITE.name} — {SITE.tagline}
-            </span>
+        <div className="mx-auto max-w-6xl px-4 py-12">
+          <div className="grid gap-10 md:grid-cols-3">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <img src="/logo-emblem.png" alt="" className="h-7 w-7 object-contain" />
+                <span className="font-bold">{SITE.name}</span>
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-muted">{SITE.tagline} — clients, projects and invoices in one desktop app.</p>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold">Download</h3>
+              <div className="mt-3 flex flex-col gap-2 text-sm text-muted">
+                <a href={DOWNLOADS.windows} className="hover:text-ink">
+                  Windows (x64)
+                </a>
+                <a href={DOWNLOADS.macos} className="hover:text-ink">
+                  macOS (Apple Silicon)
+                </a>
+                <span>7-day free trial · No card needed</span>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold">Company</h3>
+              <div className="mt-3 flex flex-col gap-2 text-sm text-muted">
+                <a href={`mailto:${SITE.supportEmail}`} className="hover:text-ink">
+                  Support
+                </a>
+                <button className="w-fit cursor-pointer text-left hover:text-ink" onClick={() => goSection('pricing')}>
+                  Pricing
+                </button>
+                <Link to="/account" className="hover:text-ink">
+                  Account
+                </Link>
+                <Link to="/privacy" className="hover:text-ink">
+                  Privacy
+                </Link>
+                <Link to="/terms" className="hover:text-ink">
+                  Terms
+                </Link>
+                <Link to="/refunds" className="hover:text-ink">
+                  Refunds
+                </Link>
+              </div>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-5">
-            <a href={`mailto:${SITE.supportEmail}`} className="hover:text-ink">
-              Support
-            </a>
-            <button className="cursor-pointer hover:text-ink" onClick={() => goSection('pricing')}>
-              Pricing
-            </button>
-            <Link to="/account" className="hover:text-ink">
-              Account
-            </Link>
+          <div className="mt-10 border-t border-line pt-6 text-xs text-muted">
+            © {new Date().getFullYear()} {SITE.name} — {SITE.tagline}
           </div>
         </div>
       </footer>

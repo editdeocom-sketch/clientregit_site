@@ -7,6 +7,7 @@ import { Auth } from '@/pages/Auth'
 import { Checkout } from '@/pages/Checkout'
 import { Account } from '@/pages/Account'
 import { Admin } from '@/pages/Admin'
+import { Privacy, Terms, Refunds } from '@/pages/legal/Legal'
 
 export function App(): ReactNode {
   return (
@@ -18,6 +19,9 @@ export function App(): ReactNode {
           <Route path="/checkout/:planId" element={<Checkout />} />
           <Route path="/account" element={<Account />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/refunds" element={<Refunds />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
