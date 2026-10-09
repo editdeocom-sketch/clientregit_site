@@ -3,6 +3,7 @@
 create table public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   email text,
+  is_admin boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -16,6 +17,8 @@ create table public.orders (
   subtotal integer not null,
   tax_percent integer not null default 0,
   tax_amount integer not null default 0,
+  discount_amount integer not null default 0,
+  coupon_code text,
   total integer not null,
   status text not null default 'created' check (status in ('created', 'paid')),
   created_at timestamptz not null default now(),
@@ -31,6 +34,19 @@ create table public.licenses (
   status text not null default 'active' check (status in ('active', 'revoked')),
   expires_at timestamptz,
   order_id uuid unique references public.orders (id),
+  created_at timestamptz not null default now()
+);
+
+create table public.coupons (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique,
+  type text not null check (type in ('percent', 'fixed')),
+  value integer not null,
+  plan_id text check (plan_id in ('lifetime', 'monthly', 'yearly')),
+  max_uses integer,
+  used_count integer not null default 0,
+  active boolean not null default true,
+  expires_at timestamptz,
   created_at timestamptz not null default now()
 );
 
@@ -63,6 +79,7 @@ create trigger on_auth_user_created
 alter table public.profiles enable row level security;
 alter table public.orders enable row level security;
 alter table public.licenses enable row level security;
+alter table public.coupons enable row level security;
 
 create policy "profiles_select_own" on public.profiles
   for select using (auth.uid() = id);
@@ -76,6 +93,4 @@ create policy "orders_select_own" on public.orders
 create policy "licenses_select_own" on public.licenses
   for select using (auth.uid() = user_id);
 
--- The desktop app reads licenses while signed in as the user (RLS allows
--- select of own rows); revocation = update status to 'revoked' via service
--- role or dashboard, which takes effect on the app's next online launch.
+-- Coupons: no public policies — only service role (admin API) can access.

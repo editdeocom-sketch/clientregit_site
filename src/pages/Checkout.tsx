@@ -2,9 +2,16 @@ import { useState, type ReactNode } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { useCurrency } from '@/lib/currency'
 import { useSession } from '@/lib/auth'
-import { createOrder, verifyPayment } from '@/lib/api'
+import { createOrder, validateCoupon, verifyPayment } from '@/lib/api'
 import { openCheckout } from '@/lib/razorpay'
 import { formatMoney, isPlanId, PLANS, quote } from '@shared/plans'
+
+interface AppliedCoupon {
+  code: string
+  type: 'percent' | 'fixed'
+  value: number
+  discountAmount: number
+}
 
 export function Checkout(): ReactNode {
   const { planId } = useParams()
@@ -12,6 +19,10 @@ export function Checkout(): ReactNode {
   const { session, loading } = useSession()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [couponInput, setCouponInput] = useState('')
+  const [applied, setApplied] = useState<AppliedCoupon | null>(null)
+  const [couponBusy, setCouponBusy] = useState(false)
+  const [couponError, setCouponError] = useState<string | null>(null)
 
   if (!planId || !isPlanId(planId)) return <Navigate to="/" replace />
   if (loading) {
@@ -23,12 +34,43 @@ export function Checkout(): ReactNode {
 
   const plan = PLANS[planId]
   const price = quote(planId, currency)
+  const discount = applied?.discountAmount ?? 0
+  const discountedSubtotal = price.subtotal - discount
+  const tax = Math.round((discountedSubtotal * price.taxPercent) / 100)
+  const total = discountedSubtotal + tax
+
+  const applyCoupon = async (): Promise<void> => {
+    const code = couponInput.trim().toUpperCase()
+    if (!code) return
+    setCouponBusy(true)
+    setCouponError(null)
+    try {
+      const result = await validateCoupon(code, planId, currency)
+      setApplied({
+        code: result.code,
+        type: result.type,
+        value: result.value,
+        discountAmount: result.discountAmount
+      })
+    } catch (err) {
+      setApplied(null)
+      setCouponError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setCouponBusy(false)
+    }
+  }
+
+  const removeCoupon = (): void => {
+    setApplied(null)
+    setCouponInput('')
+    setCouponError(null)
+  }
 
   const pay = async (): Promise<void> => {
     setBusy(true)
     setError(null)
     try {
-      const order = await createOrder(planId, currency)
+      const order = await createOrder(planId, currency, applied?.code)
       if (order.mock) {
         await verifyPayment(order.orderId, `pay_mock_${Date.now()}`, 'mock_signature')
         window.location.hash = '/account?paid=1'
@@ -78,20 +120,65 @@ export function Checkout(): ReactNode {
             <span className="font-semibold">{plan.name} plan</span>
             <span className="font-medium">{formatMoney(price.subtotal, currency)}</span>
           </div>
+          {discount > 0 && (
+            <>
+              <div className="flex items-center justify-between text-success">
+                <span>
+                  Coupon <span className="font-mono font-semibold">{applied?.code}</span>
+                </span>
+                <span>−{formatMoney(discount, currency)}</span>
+              </div>
+              {price.taxPercent > 0 && (
+                <div className="text-xs text-muted">GST is calculated on the discounted price.</div>
+              )}
+            </>
+          )}
           {price.taxPercent > 0 && (
             <>
               <div className="flex items-center justify-between text-muted">
                 <span>GST @ {price.taxPercent}%</span>
-                <span>{formatMoney(price.tax, currency)}</span>
+                <span>{formatMoney(tax, currency)}</span>
               </div>
               <div className="text-xs text-muted">CGST 9% + SGST 9%, shown on your invoice</div>
             </>
           )}
           <div className="flex items-center justify-between border-t border-line pt-3 text-base font-bold">
             <span>Total</span>
-            <span>{formatMoney(price.total, currency)}</span>
+            <span>{formatMoney(total, currency)}</span>
           </div>
         </div>
+
+        {!applied ? (
+          <div className="mt-4 flex items-end gap-2">
+            <label className="flex-1">
+              <span className="block text-xs font-medium text-muted">Coupon code</span>
+              <input
+                value={couponInput}
+                onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                placeholder="SAVE20"
+                className="mt-1 w-full rounded-lg border border-line bg-canvas px-3 py-2 font-mono text-sm uppercase focus:border-gold focus:outline-none"
+              />
+            </label>
+            <button
+              onClick={() => void applyCoupon()}
+              disabled={couponBusy || !couponInput.trim()}
+              className="cursor-pointer rounded-lg border border-line bg-surface px-4 py-2 text-sm font-semibold hover:border-gold hover:text-gold-strong disabled:opacity-50"
+            >
+              {couponBusy ? 'Checking…' : 'Apply'}
+            </button>
+          </div>
+        ) : (
+          <div className="mt-4 flex items-center justify-between rounded-lg border border-success/30 bg-green-50 px-3 py-2 text-sm">
+            <span className="text-success">
+              Coupon <span className="font-mono font-semibold">{applied.code}</span> applied — you save{' '}
+              {formatMoney(discount, currency)}
+            </span>
+            <button onClick={removeCoupon} className="cursor-pointer text-xs font-semibold text-muted hover:text-ink">
+              Remove
+            </button>
+          </div>
+        )}
+        {couponError && <p className="mt-2 text-sm text-danger">{couponError}</p>}
 
         <ul className="mt-5 space-y-1.5 text-sm text-muted">
           <li>
@@ -114,7 +201,7 @@ export function Checkout(): ReactNode {
           disabled={busy}
           className="mt-6 w-full cursor-pointer rounded-lg bg-gold px-4 py-3 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
         >
-          {busy ? 'Opening payment…' : `Pay ${formatMoney(price.total, currency)}`}
+          {busy ? 'Opening payment…' : `Pay ${formatMoney(total, currency)}`}
         </button>
 
         <p className="mt-3 text-center text-xs text-muted">

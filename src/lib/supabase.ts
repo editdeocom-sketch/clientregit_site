@@ -9,7 +9,14 @@ export function supabase(): SupabaseClient {
     if (!url || !anonKey) {
       throw new Error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
     }
-    client = createClient(url, anonKey)
+    client = createClient(url, anonKey, {
+      auth: {
+        storage: sessionStorage,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+      }
+    })
   }
   return client
 }
