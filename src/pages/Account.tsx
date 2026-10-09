@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { useSession } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
-import { formatMoney, PLANS } from '@shared/plans'
+import { usePlans } from '@/lib/plans'
+import { formatMoney } from '@shared/plans'
 import { DOWNLOADS, SITE } from '@shared/site'
 
 interface LicenseRow {
@@ -38,7 +39,7 @@ function maskKey(key: string): string {
   return [parts[0], '••••', '••••', '••••', parts[4]].join('-')
 }
 
-function LicenseCard({ license }: { license: LicenseRow }): ReactNode {
+function LicenseCard({ license, planName }: { license: LicenseRow; planName: (id: string) => string }): ReactNode {
   const [copied, setCopied] = useState(false)
   const [revealed, setRevealed] = useState(false)
   const copy = async (): Promise<void> => {
@@ -54,7 +55,7 @@ function LicenseCard({ license }: { license: LicenseRow }): ReactNode {
   return (
     <div className="rounded-xl border border-line bg-surface p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="font-semibold">{PLANS[license.plan_id as keyof typeof PLANS]?.name ?? license.plan_id}</span>
+        <span className="font-semibold">{planName(license.plan_id)}</span>
         <span
           className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
             license.status === 'revoked' || expired
@@ -108,8 +109,15 @@ function formatDate(iso: string): string {
   return `${dd}/${mm}/${d.getFullYear()}`
 }
 
-function InvoiceView({ order, onClose }: { order: OrderRow; onClose: () => void }): ReactNode {
-  const plan = PLANS[order.plan_id as keyof typeof PLANS]
+function InvoiceView({
+  order,
+  planName,
+  onClose
+}: {
+  order: OrderRow
+  planName: (id: string) => string
+  onClose: () => void
+}): ReactNode {
   const date = formatDate(order.paid_at ?? order.created_at)
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4">
@@ -149,7 +157,7 @@ function InvoiceView({ order, onClose }: { order: OrderRow; onClose: () => void 
           <tbody>
             <tr className="border-b border-gray-100">
               <td className="py-2">
-                {plan?.name ?? order.plan_id} plan — {SITE.name} license
+                {planName(order.plan_id)} plan — {SITE.name} license
               </td>
               <td className="py-2 text-right">{formatMoney(order.subtotal, order.currency)}</td>
             </tr>
@@ -290,6 +298,8 @@ function SettingsPanel({ email }: { email: string }): ReactNode {
 export function Account(): ReactNode {
   const { session, loading } = useSession()
   const [params] = useSearchParams()
+  const allPlans = usePlans()
+  const planName = (id: string): string => allPlans?.find((p) => p.id === id)?.name ?? id
   const [tab, setTab] = useState<'overview' | 'licenses' | 'orders' | 'settings'>(
     params.get('paid') ? 'orders' : 'overview'
   )
@@ -424,7 +434,7 @@ export function Account(): ReactNode {
               {activeLicenses.map((license) => (
                 <div key={license.id} className="mt-3 space-y-1 text-sm">
                   <p className="font-medium">
-                    {PLANS[license.plan_id as keyof typeof PLANS]?.name ?? license.plan_id} plan
+                    {planName(license.plan_id)} plan
                   </p>
                   <p className="text-muted">
                     Started {formatDate(license.created_at)}
@@ -484,7 +494,7 @@ export function Account(): ReactNode {
               </Link>
             </div>
           ) : (
-            licenses.map((license) => <LicenseCard key={license.id} license={license} />)
+            licenses.map((license) => <LicenseCard key={license.id} license={license} planName={planName} />)
           )}
         </div>
       )}
@@ -507,7 +517,7 @@ export function Account(): ReactNode {
                 >
                   <div>
                     <p className="font-semibold">
-                      {PLANS[order.plan_id as keyof typeof PLANS]?.name ?? order.plan_id} plan
+                      {planName(order.plan_id)} plan
                     </p>
                     <p className="text-xs text-muted">
                       {formatDate(order.paid_at ?? order.created_at)} ·{' '}
@@ -530,7 +540,7 @@ export function Account(): ReactNode {
 
       {tab === 'settings' && <SettingsPanel email={session.user.email ?? ''} />}
 
-      {invoice && <InvoiceView order={invoice} onClose={() => setInvoice(null)} />}
+      {invoice && <InvoiceView order={invoice} planName={planName} onClose={() => setInvoice(null)} />}
     </div>
   )
 }

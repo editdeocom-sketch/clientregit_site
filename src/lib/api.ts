@@ -172,3 +172,46 @@ export function adminUpdateCoupon(
 export function adminDeleteCoupon(id: string): Promise<{ ok: boolean }> {
   return adminPost<{ ok: boolean }>({ action: 'deleteCoupon', id })
 }
+
+export interface AdminPlanRow {
+  id: string
+  name: string
+  blurb: string
+  license_type: 'perpetual' | 'subscription'
+  months: number | null
+  price_inr: number
+  price_usd: number
+  active: boolean
+  sort_order: number
+  highlight: boolean
+  created_at: string
+}
+
+export function adminPlans(): Promise<{ plans: AdminPlanRow[] }> {
+  return adminFetch<{ plans: AdminPlanRow[] }>('/api/admin?resource=plans')
+}
+
+export interface PlanPayload {
+  id: string
+  name: string
+  blurb: string
+  licenseType: 'perpetual' | 'subscription'
+  months: number | null
+  priceInr: number
+  priceUsd: number
+  active: boolean
+  sortOrder: number
+  highlight: boolean
+}
+
+export function adminCreatePlan(plan: PlanPayload): Promise<{ ok: boolean }> {
+  return adminPost<{ ok: boolean }>({ action: 'createPlan', ...plan })
+}
+
+export function adminUpdatePlan(id: string, plan: Partial<PlanPayload>): Promise<{ ok: boolean }> {
+  return adminPost<{ ok: boolean }>({ action: 'updatePlan', id, ...plan })
+}
+
+export function adminDeletePlan(id: string): Promise<{ ok: boolean }> {
+  return adminPost<{ ok: boolean }>({ action: 'deletePlan', id })
+}

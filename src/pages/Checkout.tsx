@@ -2,9 +2,10 @@ import { useState, type ReactNode } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { useCurrency } from '@/lib/currency'
 import { useSession } from '@/lib/auth'
+import { usePlans, planById } from '@/lib/plans'
 import { createOrder, validateCoupon, verifyPayment } from '@/lib/api'
 import { openCheckout } from '@/lib/razorpay'
-import { formatMoney, isPlanId, PLANS, quote } from '@shared/plans'
+import { formatMoney, quotePlan } from '@shared/plans'
 
 interface AppliedCoupon {
   code: string
@@ -17,6 +18,7 @@ export function Checkout(): ReactNode {
   const { planId } = useParams()
   const { currency } = useCurrency()
   const { session, loading } = useSession()
+  const plans = usePlans()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [couponInput, setCouponInput] = useState('')
@@ -24,16 +26,17 @@ export function Checkout(): ReactNode {
   const [couponBusy, setCouponBusy] = useState(false)
   const [couponError, setCouponError] = useState<string | null>(null)
 
-  if (!planId || !isPlanId(planId)) return <Navigate to="/" replace />
-  if (loading) {
+  if (loading || plans === null) {
     return <div className="py-24 text-center text-sm text-muted">Loading…</div>
   }
   if (!session) {
-    return <Navigate to={`/auth?next=/checkout/${planId}`} replace />
+    return <Navigate to={`/auth?next=/checkout/${planId ?? ''}`} replace />
   }
 
-  const plan = PLANS[planId]
-  const price = quote(planId, currency)
+  const plan = planById(plans, planId)
+  if (!plan || !plan.active) return <Navigate to="/" replace />
+
+  const price = quotePlan(plan, currency)
   const discount = applied?.discountAmount ?? 0
   const discountedSubtotal = price.subtotal - discount
   const tax = Math.round((discountedSubtotal * price.taxPercent) / 100)
@@ -45,7 +48,7 @@ export function Checkout(): ReactNode {
     setCouponBusy(true)
     setCouponError(null)
     try {
-      const result = await validateCoupon(code, planId, currency)
+      const result = await validateCoupon(code, plan.id, currency)
       setApplied({
         code: result.code,
         type: result.type,
@@ -70,7 +73,7 @@ export function Checkout(): ReactNode {
     setBusy(true)
     setError(null)
     try {
-      const order = await createOrder(planId, currency, applied?.code)
+      const order = await createOrder(plan.id, currency, applied?.code)
       if (order.mock) {
         await verifyPayment(order.orderId, `pay_mock_${Date.now()}`, 'mock_signature')
         window.location.hash = '/account?paid=1'
@@ -184,7 +187,7 @@ export function Checkout(): ReactNode {
           <li>
             ✓ {plan.licenseType === 'perpetual'
               ? 'Lifetime license — never expires'
-              : `Active ${plan.months === 1 ? 'for one month' : `for ${plan.months} months`}, renews automatically`}
+              : `Active for ${plan.months} month${plan.months === 1 ? '' : 's'}, renews automatically`}
           </li>
           <li>✓ License key appears in your account immediately after payment</li>
           <li>✓ 14-day refunds — email support</li>

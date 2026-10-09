@@ -1,6 +1,7 @@
 ﻿import crypto from 'node:crypto'
-import { PLANS, type LicenseType } from '../../src/shared/plans.js'
+import type { LicenseType } from '../../src/shared/plans.js'
 import { supabaseAdmin } from './supabase.js'
+import { fetchPlans } from './plans.js'
 
 function generateKey(): string {
   const hex = crypto.randomBytes(8).toString('hex').toUpperCase()
@@ -41,9 +42,9 @@ export async function fulfillOrder(razorpayOrderId: string, paymentId: string): 
       .select('id')
     if (updateError) throw new Error(`Order update failed: ${updateError.message}`)
     if ((updated ?? []).length > 0) {
-      const plan = PLANS[order.plan_id as keyof typeof PLANS]
+      const plan = (await fetchPlans()).find((p) => p.id === order.plan_id)
       if (!plan) throw new Error(`Unknown plan: ${order.plan_id}`)
-      const type: LicenseType = plan.licenseType
+      const type: LicenseType = plan.license_type
       const { error: insertError } = await db.from('licenses').insert({
         user_id: order.user_id,
         license_key: generateKey(),

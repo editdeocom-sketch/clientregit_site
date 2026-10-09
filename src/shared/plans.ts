@@ -1,52 +1,62 @@
-export type PlanId = 'lifetime' | 'monthly' | 'yearly'
 export type CurrencyCode = 'INR' | 'USD'
 export type LicenseType = 'perpetual' | 'subscription'
 
-export interface Plan {
-  id: PlanId
+/** Kept as a plain string alias — plan ids come from the database now. */
+export type PlanId = string
+
+export interface SitePlan {
+  id: string
   name: string
   blurb: string
   licenseType: LicenseType
+  /** billing period in months; null for perpetual */
   months: number | null
   /** Prices in minor units (paise / cents), before tax */
   prices: Record<CurrencyCode, number>
+  active: boolean
+  sortOrder: number
+  highlight: boolean
 }
 
-export const PLANS: Record<PlanId, Plan> = {
-  lifetime: {
-    id: 'lifetime',
-    name: 'Lifetime',
-    blurb: 'One payment, yours forever. All future updates included.',
-    licenseType: 'perpetual',
-    months: null,
-    prices: { INR: 399900, USD: 4900 }
-  },
-  monthly: {
+/** Seed values — used as a client fallback only if the plans table is unreachable. */
+export const FALLBACK_PLANS: SitePlan[] = [
+  {
     id: 'monthly',
     name: 'Monthly',
     blurb: 'Full access, cancel anytime. Billed every month.',
     licenseType: 'subscription',
     months: 1,
-    prices: { INR: 15900, USD: 200 }
+    prices: { INR: 15900, USD: 200 },
+    active: true,
+    sortOrder: 1,
+    highlight: false
   },
-  yearly: {
+  {
     id: 'yearly',
     name: 'Yearly',
     blurb: 'Full access for a year — two months free vs monthly.',
     licenseType: 'subscription',
     months: 12,
-    prices: { INR: 109900, USD: 1400 }
+    prices: { INR: 109900, USD: 1400 },
+    active: true,
+    sortOrder: 2,
+    highlight: true
+  },
+  {
+    id: 'lifetime',
+    name: 'Lifetime',
+    blurb: 'One payment, yours forever. All future updates included.',
+    licenseType: 'perpetual',
+    months: null,
+    prices: { INR: 399900, USD: 4900 },
+    active: true,
+    sortOrder: 3,
+    highlight: false
   }
-}
-
-export const PLAN_ORDER: PlanId[] = ['monthly', 'yearly', 'lifetime']
+]
 
 /** Indian GST applied to INR prices (exclusive display). */
 export const GST_PERCENT = 18
-
-export function isPlanId(value: string): value is PlanId {
-  return value === 'lifetime' || value === 'monthly' || value === 'yearly'
-}
 
 export interface PriceQuote {
   currency: CurrencyCode
@@ -59,8 +69,8 @@ export interface PriceQuote {
   total: number
 }
 
-export function quote(plan: PlanId, currency: CurrencyCode): PriceQuote {
-  const subtotal = PLANS[plan].prices[currency]
+export function quotePlan(plan: SitePlan, currency: CurrencyCode): PriceQuote {
+  const subtotal = plan.prices[currency] ?? 0
   const taxPercent = currency === 'INR' ? GST_PERCENT : 0
   const tax = Math.round((subtotal * taxPercent) / 100)
   return { currency, subtotal, taxPercent, tax, total: subtotal + tax }

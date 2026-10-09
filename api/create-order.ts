@@ -8,8 +8,9 @@
 } from './_lib/http.js'
 import { getUserFromToken, supabaseAdmin } from './_lib/supabase.js'
 import { validateCouponFor } from './_lib/coupons.js'
+import { planSubtotal, requireActivePlan, taxPercentFor } from './_lib/plans.js'
 import { createRazorpayOrder, isMockPayments, razorpayKeyId } from './_lib/razorpay.js'
-import { isPlanId, quote, type CurrencyCode } from '../src/shared/plans.js'
+import type { CurrencyCode } from '../src/shared/plans.js'
 import crypto from 'node:crypto'
 
 export default async function handler(req: HandlerRequest, res: HandlerResponse): Promise<void> {
@@ -27,15 +28,17 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
     const planId = typeof body.planId === 'string' ? body.planId : ''
     const currency = body.currency === 'USD' ? 'USD' : body.currency === 'INR' ? 'INR' : null
     const couponCode = typeof body.couponCode === 'string' ? body.couponCode : ''
-    if (!isPlanId(planId)) throw new HttpError(400, 'Unknown plan.')
     if (!currency) throw new HttpError(400, 'Currency must be INR or USD.')
 
-    const price = quote(planId, currency as CurrencyCode)
+    const plan = await requireActivePlan(planId)
+    const currencyCode = currency as CurrencyCode
+    const subtotal = planSubtotal(plan, currencyCode)
+    const taxPercent = taxPercentFor(currencyCode)
 
     let discountAmount = 0
     let appliedCouponCode: string | null = null
     if (couponCode.trim()) {
-      const { coupon, discountAmount: discount } = await validateCouponFor(couponCode, planId, price.subtotal)
+      const { coupon, discountAmount: discount } = await validateCouponFor(couponCode, planId, subtotal)
       discountAmount = discount
       appliedCouponCode = coupon.code
 
@@ -50,8 +53,8 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
       }
     }
 
-    const discountedSubtotal = price.subtotal - discountAmount
-    const tax = Math.round((discountedSubtotal * price.taxPercent) / 100)
+    const discountedSubtotal = subtotal - discountAmount
+    const tax = Math.round((discountedSubtotal * taxPercent) / 100)
     const total = discountedSubtotal + tax
 
     let orderId: string
@@ -71,8 +74,8 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
       razorpay_order_id: orderId,
       plan_id: planId,
       currency,
-      subtotal: price.subtotal,
-      tax_percent: price.taxPercent,
+      subtotal,
+      tax_percent: taxPercent,
       tax_amount: tax,
       discount_amount: discountAmount,
       coupon_code: appliedCouponCode,

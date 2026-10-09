@@ -2,23 +2,29 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useSession } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
+import { usePlanName, usePlans } from '@/lib/plans'
 import {
   adminCoupons,
   adminCreateCoupon,
+  adminCreatePlan,
   adminDeleteCoupon,
+  adminDeletePlan,
   adminLicenses,
   adminOrders,
+  adminPlans,
   adminSetLicenseStatus,
   adminUpdateCoupon,
+  adminUpdatePlan,
   adminUsers,
   type AdminCouponRow,
   type AdminLicenseRow,
   type AdminOrderRow,
+  type AdminPlanRow,
   type AdminUserRow
 } from '@/lib/api'
-import { formatMoney, PLANS } from '@shared/plans'
+import { formatMoney } from '@shared/plans'
 
-type Tab = 'users' | 'licenses' | 'orders' | 'coupons'
+type Tab = 'users' | 'licenses' | 'orders' | 'coupons' | 'plans'
 
 const TH = 'px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted'
 const TD = 'px-3 py-2 text-sm'
@@ -29,10 +35,6 @@ function fmtDate(iso: string | null): string {
   const dd = String(d.getDate()).padStart(2, '0')
   const mm = String(d.getMonth() + 1).padStart(2, '0')
   return `${dd}/${mm}/${d.getFullYear()}`
-}
-
-function planName(id: string): string {
-  return PLANS[id as keyof typeof PLANS]?.name ?? id
 }
 
 function UsersTab(): ReactNode {
@@ -82,6 +84,7 @@ function UsersTab(): ReactNode {
 }
 
 function LicensesTab(): ReactNode {
+  const planName = usePlanName()
   const [rows, setRows] = useState<AdminLicenseRow[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const load = useCallback((): void => {
@@ -157,6 +160,7 @@ function LicensesTab(): ReactNode {
 }
 
 function OrdersTab(): ReactNode {
+  const planName = usePlanName()
   const [rows, setRows] = useState<AdminOrderRow[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   useEffect(() => {
@@ -214,6 +218,7 @@ function OrdersTab(): ReactNode {
 }
 
 function CouponForm({ onDone }: { onDone: () => void }): ReactNode {
+  const plans = usePlans()
   const [code, setCode] = useState('')
   const [type, setType] = useState<'percent' | 'fixed'>('percent')
   const [value, setValue] = useState('')
@@ -290,9 +295,11 @@ function CouponForm({ onDone }: { onDone: () => void }): ReactNode {
             className="mt-1 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm focus:border-gold focus:outline-none"
           >
             <option value="">Any plan</option>
-            <option value="lifetime">Lifetime</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
+            {(plans ?? []).map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
           </select>
         </label>
         <label className="block">
@@ -328,6 +335,7 @@ function CouponForm({ onDone }: { onDone: () => void }): ReactNode {
 }
 
 function CouponsTab(): ReactNode {
+  const planName = usePlanName()
   const [rows, setRows] = useState<AdminCouponRow[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
@@ -447,6 +455,361 @@ function CouponsTab(): ReactNode {
   )
 }
 
+interface PlanFormState {
+  id: string
+  name: string
+  blurb: string
+  licenseType: 'perpetual' | 'subscription'
+  months: string
+  priceInr: string
+  priceUsd: string
+  active: boolean
+  sortOrder: string
+  highlight: boolean
+}
+
+const EMPTY_PLAN: PlanFormState = {
+  id: '',
+  name: '',
+  blurb: '',
+  licenseType: 'subscription',
+  months: '1',
+  priceInr: '',
+  priceUsd: '',
+  active: true,
+  sortOrder: '0',
+  highlight: false
+}
+
+function rowToForm(row: AdminPlanRow): PlanFormState {
+  return {
+    id: row.id,
+    name: row.name,
+    blurb: row.blurb,
+    licenseType: row.license_type,
+    months: row.months !== null ? String(row.months) : '',
+    priceInr: (row.price_inr / 100).toString(),
+    priceUsd: (row.price_usd / 100).toString(),
+    active: row.active,
+    sortOrder: String(row.sort_order),
+    highlight: row.highlight
+  }
+}
+
+function PlanForm({
+  editing,
+  onDone
+}: {
+  editing: AdminPlanRow | null
+  onDone: () => void
+}): ReactNode {
+  const [form, setForm] = useState<PlanFormState>(editing ? rowToForm(editing) : EMPTY_PLAN)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const set = <K extends keyof PlanFormState>(key: K, value: PlanFormState[K]): void =>
+    setForm((f) => ({ ...f, [key]: value }))
+
+  const submit = async (e: React.FormEvent): Promise<void> => {
+    e.preventDefault()
+    const months = form.licenseType === 'subscription' ? Number(form.months) : null
+    const priceInr = Math.round(Number(form.priceInr) * 100)
+    const priceUsd = Math.round(Number(form.priceUsd) * 100)
+    if (!form.name.trim()) return setError('Name is required.')
+    if (form.licenseType === 'subscription' && (!Number.isInteger(months) || (months ?? 0) < 1)) {
+      return setError('Subscription plans need months >= 1.')
+    }
+    if (!Number.isFinite(priceInr) || priceInr < 0 || !Number.isFinite(priceUsd) || priceUsd < 0) {
+      return setError('Prices must be non-negative numbers.')
+    }
+    setBusy(true)
+    setError(null)
+    const payload = {
+      name: form.name.trim(),
+      blurb: form.blurb.trim(),
+      licenseType: form.licenseType,
+      months,
+      priceInr,
+      priceUsd,
+      active: form.active,
+      sortOrder: Number(form.sortOrder) || 0,
+      highlight: form.highlight
+    }
+    try {
+      if (editing) {
+        await adminUpdatePlan(editing.id, payload)
+      } else {
+        await adminCreatePlan({ id: form.id.trim().toLowerCase(), ...payload })
+      }
+      onDone()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const input =
+    'mt-1 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm focus:border-gold focus:outline-none'
+
+  return (
+    <form onSubmit={(e) => void submit(e)} className="mt-4 rounded-xl border border-line bg-surface p-5">
+      <h2 className="font-semibold">{editing ? `Edit plan: ${editing.id}` : 'Create plan'}</h2>
+      <div className="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
+        <label className="block">
+          <span className="text-xs font-medium text-muted">ID (slug)</span>
+          <input
+            value={form.id}
+            onChange={(e) => set('id', e.target.value.toLowerCase())}
+            disabled={Boolean(editing)}
+            placeholder="yearly"
+            className={`${input} font-mono disabled:opacity-60`}
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs font-medium text-muted">Name</span>
+          <input value={form.name} onChange={(e) => set('name', e.target.value)} className={input} />
+        </label>
+        <label className="block">
+          <span className="text-xs font-medium text-muted">Type</span>
+          <select
+            value={form.licenseType}
+            onChange={(e) => set('licenseType', e.target.value as PlanFormState['licenseType'])}
+            className={input}
+          >
+            <option value="subscription">Subscription</option>
+            <option value="perpetual">Perpetual (lifetime)</option>
+          </select>
+        </label>
+        {form.licenseType === 'subscription' && (
+          <label className="block">
+            <span className="text-xs font-medium text-muted">Months per period</span>
+            <input
+              value={form.months}
+              onChange={(e) => set('months', e.target.value)}
+              inputMode="numeric"
+              className={input}
+            />
+          </label>
+        )}
+        <label className="block">
+          <span className="text-xs font-medium text-muted">Price ₹ (before GST)</span>
+          <input
+            value={form.priceInr}
+            onChange={(e) => set('priceInr', e.target.value)}
+            inputMode="decimal"
+            placeholder="1099"
+            className={input}
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs font-medium text-muted">Price $</span>
+          <input
+            value={form.priceUsd}
+            onChange={(e) => set('priceUsd', e.target.value)}
+            inputMode="decimal"
+            placeholder="14"
+            className={input}
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs font-medium text-muted">Sort order</span>
+          <input
+            value={form.sortOrder}
+            onChange={(e) => set('sortOrder', e.target.value)}
+            inputMode="numeric"
+            className={input}
+          />
+        </label>
+        <label className="col-span-full block sm:col-span-2">
+          <span className="text-xs font-medium text-muted">Blurb</span>
+          <input value={form.blurb} onChange={(e) => set('blurb', e.target.value)} className={input} />
+        </label>
+        <div className="flex items-end gap-5 pb-1">
+          <label className="flex cursor-pointer items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={form.active}
+              onChange={(e) => set('active', e.target.checked)}
+              className="cursor-pointer"
+            />
+            Active (for sale)
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={form.highlight}
+              onChange={(e) => set('highlight', e.target.checked)}
+              className="cursor-pointer"
+            />
+            Highlight
+          </label>
+        </div>
+      </div>
+      {error && <p className="mt-3 text-sm text-danger">{error}</p>}
+      <div className="mt-4 flex gap-2">
+        <button
+          type="submit"
+          disabled={busy}
+          className="cursor-pointer rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
+        >
+          {busy ? 'Saving…' : editing ? 'Save changes' : 'Create plan'}
+        </button>
+        <button
+          type="button"
+          onClick={onDone}
+          className="cursor-pointer rounded-lg border border-line px-4 py-2 text-sm font-semibold hover:border-gold hover:text-gold-strong"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  )
+}
+
+function PlansTab(): ReactNode {
+  const [rows, setRows] = useState<AdminPlanRow[] | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [showForm, setShowForm] = useState(false)
+  const [editing, setEditing] = useState<AdminPlanRow | null>(null)
+
+  const load = useCallback((): void => {
+    adminPlans()
+      .then((r) => setRows(r.plans))
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
+  }, [])
+  useEffect(load, [load])
+
+  const toggleActive = async (plan: AdminPlanRow): Promise<void> => {
+    try {
+      await adminUpdatePlan(plan.id, { active: !plan.active })
+      load()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    }
+  }
+
+  const remove = async (plan: AdminPlanRow): Promise<void> => {
+    if (!window.confirm(`Delete plan "${plan.name}" (${plan.id})? Existing orders keep showing the raw id.`)) {
+      return
+    }
+    try {
+      await adminDeletePlan(plan.id)
+      load()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    }
+  }
+
+  const closeForm = (): void => {
+    setShowForm(false)
+    setEditing(null)
+    load()
+  }
+
+  return (
+    <div className="mt-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted">
+          Plans shown on the pricing page and sold at checkout. Prices are before GST.
+        </p>
+        <button
+          onClick={() => {
+            setEditing(null)
+            setShowForm((v) => !v)
+          }}
+          className="cursor-pointer rounded-lg border border-line bg-surface px-3.5 py-2 text-xs font-semibold hover:border-gold hover:text-gold-strong"
+        >
+          {showForm || editing ? 'Close form' : '+ New plan'}
+        </button>
+      </div>
+      {(showForm || editing) && <PlanForm editing={editing} onDone={closeForm} />}
+      {error && <p className="mt-3 text-sm text-danger">{error}</p>}
+      {rows === null ? (
+        <p className="mt-4 text-sm text-muted">Loading…</p>
+      ) : rows.length === 0 ? (
+        <div className="mt-4 rounded-xl border border-dashed border-line bg-surface p-8 text-center text-sm text-muted">
+          No plans yet.
+        </div>
+      ) : (
+        <div className="mt-4 overflow-x-auto rounded-xl border border-line bg-surface">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b border-line">
+                <th className={TH}>ID</th>
+                <th className={TH}>Name</th>
+                <th className={TH}>Type</th>
+                <th className={TH}>₹ (INR)</th>
+                <th className={TH}>$ (USD)</th>
+                <th className={TH}>Sort</th>
+                <th className={TH}>Status</th>
+                <th className={TH}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((p) => (
+                <tr key={p.id} className="border-b border-line/50 last:border-0">
+                  <td className={`${TD} font-mono text-xs`}>{p.id}</td>
+                  <td className={TD}>
+                    <span className="font-medium">{p.name}</span>
+                    {p.highlight && (
+                      <span className="ml-2 rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 text-[11px] font-semibold text-gold-strong">
+                        Popular
+                      </span>
+                    )}
+                  </td>
+                  <td className={`${TD} text-muted`}>
+                    {p.license_type === 'perpetual' ? 'Lifetime' : `${p.months} mo`}
+                  </td>
+                  <td className={TD}>{formatMoney(p.price_inr, 'INR')}</td>
+                  <td className={TD}>{formatMoney(p.price_usd, 'USD')}</td>
+                  <td className={`${TD} text-muted`}>{p.sort_order}</td>
+                  <td className={TD}>
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
+                        p.active
+                          ? 'border-success/30 bg-green-50 text-success'
+                          : 'border-line bg-surface-2 text-muted'
+                      }`}
+                    >
+                      {p.active ? 'Active' : 'Hidden'}
+                    </span>
+                  </td>
+                  <td className={TD}>
+                    <div className="flex gap-1.5">
+                      <button
+                        onClick={() => {
+                          setEditing(p)
+                          setShowForm(true)
+                        }}
+                        className="cursor-pointer rounded-md border border-line px-2.5 py-1 text-xs font-semibold hover:border-gold hover:text-gold-strong"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => void toggleActive(p)}
+                        className="cursor-pointer rounded-md border border-line px-2.5 py-1 text-xs font-semibold hover:border-gold hover:text-gold-strong"
+                      >
+                        {p.active ? 'Hide' : 'Show'}
+                      </button>
+                      <button
+                        onClick={() => void remove(p)}
+                        className="cursor-pointer rounded-md border border-danger/30 px-2.5 py-1 text-xs font-semibold text-danger hover:bg-red-50"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function Admin(): ReactNode {
   const { session, loading } = useSession()
   const [tab, setTab] = useState<Tab>('users')
@@ -494,6 +857,7 @@ export function Admin(): ReactNode {
   }
 
   const tabs: { id: Tab; label: string }[] = [
+    { id: 'plans', label: 'Plans' },
     { id: 'users', label: 'Users' },
     { id: 'licenses', label: 'Licenses' },
     { id: 'orders', label: 'Orders' },
@@ -515,7 +879,7 @@ export function Admin(): ReactNode {
         </Link>
       </div>
 
-      <div className="mt-6 grid grid-cols-4 gap-1 rounded-lg bg-surface-2 p-1 text-sm font-medium">
+      <div className="mt-6 grid grid-cols-5 gap-1 rounded-lg bg-surface-2 p-1 text-sm font-medium">
         {tabs.map((t) => (
           <button
             key={t.id}
@@ -527,6 +891,7 @@ export function Admin(): ReactNode {
         ))}
       </div>
 
+      {tab === 'plans' && <PlansTab />}
       {tab === 'users' && <UsersTab />}
       {tab === 'licenses' && <LicensesTab />}
       {tab === 'orders' && <OrdersTab />}

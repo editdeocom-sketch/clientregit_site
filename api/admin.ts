@@ -7,7 +7,7 @@ import {
 } from './_lib/http.js'
 import { requireAdmin } from './_lib/admin.js'
 import { supabaseAdmin } from './_lib/supabase.js'
-import { isPlanId } from '../src/shared/plans.js'
+import { invalidatePlanCache } from './_lib/plans.js'
 
 function queryValue(req: HandlerRequest, key: string): string | undefined {
   const raw = req.query?.[key]
@@ -85,11 +85,116 @@ async function listCoupons(): Promise<{ coupons: unknown[] }> {
   return { coupons: data ?? [] }
 }
 
+async function listPlans(): Promise<{ plans: unknown[] }> {
+  const { data, error } = await supabaseAdmin().from('plans').select('*').order('sort_order')
+  if (error) throw new HttpError(500, `Could not load plans: ${error.message}`)
+  return { plans: data ?? [] }
+}
+
+const PLAN_ID_RE = /^[a-z0-9][a-z0-9-]{1,38}$/
+
+function parsePlanFields(body: Record<string, unknown>, partial: boolean): Record<string, unknown> {
+  const patch: Record<string, unknown> = {}
+  if (!partial || body.id !== undefined) {
+    const id = typeof body.id === 'string' ? body.id.trim().toLowerCase() : ''
+    if (!PLAN_ID_RE.test(id)) {
+      throw new HttpError(400, 'Plan id must be 2-39 chars: lowercase letters, digits, hyphens.')
+    }
+    patch.id = id
+  }
+  if (!partial || body.name !== undefined) {
+    const name = typeof body.name === 'string' ? body.name.trim() : ''
+    if (!name) throw new HttpError(400, 'Plan name is required.')
+    patch.name = name
+  }
+  if (body.blurb !== undefined) patch.blurb = typeof body.blurb === 'string' ? body.blurb.trim() : ''
+  if (!partial || body.licenseType !== undefined) {
+    const licenseType = body.licenseType
+    if (licenseType !== 'perpetual' && licenseType !== 'subscription') {
+      throw new HttpError(400, 'licenseType must be perpetual or subscription.')
+    }
+    patch.license_type = licenseType
+  }
+  if (body.months !== undefined) {
+    const months = body.months
+    if (months !== null && (typeof months !== 'number' || !Number.isInteger(months) || months < 1)) {
+      throw new HttpError(400, 'months must be a positive integer or null.')
+    }
+    patch.months = months
+  }
+  for (const key of ['priceInr', 'priceUsd'] as const) {
+    const column = key === 'priceInr' ? 'price_inr' : 'price_usd'
+    if (!partial || body[key] !== undefined) {
+      const value = body[key]
+      if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) {
+        throw new HttpError(400, `${key} must be a non-negative integer (minor units).`)
+      }
+      patch[column] = value
+    }
+  }
+  if (body.active !== undefined) {
+    if (typeof body.active !== 'boolean') throw new HttpError(400, 'active must be boolean.')
+    patch.active = body.active
+  }
+  if (body.sortOrder !== undefined) {
+    if (typeof body.sortOrder !== 'number' || !Number.isInteger(body.sortOrder)) {
+      throw new HttpError(400, 'sortOrder must be an integer.')
+    }
+    patch.sort_order = body.sortOrder
+  }
+  if (body.highlight !== undefined) {
+    if (typeof body.highlight !== 'boolean') throw new HttpError(400, 'highlight must be boolean.')
+    patch.highlight = body.highlight
+  }
+  if (!partial && patch.months === undefined) patch.months = null
+  if (!partial && patch.blurb === undefined) patch.blurb = ''
+  if (!partial && patch.active === undefined) patch.active = true
+  if (!partial && patch.sort_order === undefined) patch.sort_order = 0
+  if (!partial && patch.highlight === undefined) patch.highlight = false
+  if (patch.license_type === 'perpetual') patch.months = null
+  if (patch.license_type === 'subscription' && patch.months === undefined && !partial) {
+    throw new HttpError(400, 'Subscription plans need months >= 1.')
+  }
+  if (patch.license_type === 'subscription' && patch.months === null) {
+    throw new HttpError(400, 'Subscription plans need months >= 1.')
+  }
+  return patch
+}
+
+async function createPlan(body: Record<string, unknown>): Promise<void> {
+  const row = parsePlanFields(body, false)
+  const { error } = await supabaseAdmin().from('plans').insert(row)
+  if (error) throw new HttpError(400, error.code === '23505' ? `Plan ${row.id} already exists.` : error.message)
+  invalidatePlanCache()
+}
+
+async function updatePlan(body: Record<string, unknown>): Promise<void> {
+  const id = typeof body.id === 'string' ? body.id.trim().toLowerCase() : ''
+  if (!id) throw new HttpError(400, 'id is required.')
+  const patch = parsePlanFields({ ...body, id: undefined }, true)
+  if (Object.keys(patch).length === 0) throw new HttpError(400, 'Nothing to update.')
+  const { error } = await supabaseAdmin().from('plans').update(patch).eq('id', id)
+  if (error) throw new HttpError(400, error.message)
+  invalidatePlanCache()
+}
+
+async function deletePlan(id: string): Promise<void> {
+  if (!id) throw new HttpError(400, 'id is required.')
+  const { error } = await supabaseAdmin().from('plans').delete().eq('id', id)
+  if (error) throw new HttpError(500, `Could not delete plan: ${error.message}`)
+  invalidatePlanCache()
+}
+
 async function setLicenseStatus(licenseId: string, status: string): Promise<void> {
   if (status !== 'active' && status !== 'revoked') throw new HttpError(400, 'Status must be active or revoked.')
   if (typeof licenseId !== 'string' || !licenseId) throw new HttpError(400, 'licenseId is required.')
   const { error } = await supabaseAdmin().from('licenses').update({ status }).eq('id', licenseId)
   if (error) throw new HttpError(500, `Could not update license: ${error.message}`)
+}
+
+async function assertPlanExists(planId: string): Promise<void> {
+  const { data } = await supabaseAdmin().from('plans').select('id').eq('id', planId).single()
+  if (!data) throw new HttpError(400, 'Unknown plan.')
 }
 
 async function createCoupon(body: Record<string, unknown>): Promise<void> {
@@ -104,7 +209,7 @@ async function createCoupon(body: Record<string, unknown>): Promise<void> {
   if (!type) throw new HttpError(400, 'Type must be percent or fixed.')
   if (value === null || !Number.isFinite(value) || value <= 0) throw new HttpError(400, 'Value must be positive.')
   if (type === 'percent' && value > 100) throw new HttpError(400, 'Percent cannot exceed 100.')
-  if (planId && !isPlanId(planId)) throw new HttpError(400, 'Unknown plan.')
+  if (planId) await assertPlanExists(planId)
 
   const { error } = await supabaseAdmin().from('coupons').insert({
     code,
@@ -137,8 +242,9 @@ async function updateCoupon(body: Record<string, unknown>): Promise<void> {
   }
   if (body.planId !== undefined) {
     const planId = body.planId
-    if (planId !== null && (typeof planId !== 'string' || !isPlanId(planId))) {
-      throw new HttpError(400, 'Unknown plan.')
+    if (planId !== null) {
+      if (typeof planId !== 'string') throw new HttpError(400, 'Unknown plan.')
+      await assertPlanExists(planId)
     }
     patch.plan_id = planId
   }
@@ -194,6 +300,10 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
         res.status(200).json(await listCoupons())
         return
       }
+      if (resource === 'plans') {
+        res.status(200).json(await listPlans())
+        return
+      }
       throw new HttpError(400, 'Unknown resource.')
     }
 
@@ -218,6 +328,15 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
           break
         case 'deleteCoupon':
           await deleteCoupon(typeof body.id === 'string' ? body.id : '')
+          break
+        case 'createPlan':
+          await createPlan(body)
+          break
+        case 'updatePlan':
+          await updatePlan(body)
+          break
+        case 'deletePlan':
+          await deletePlan(typeof body.id === 'string' ? body.id : '')
           break
         default:
           throw new HttpError(400, 'Unknown action.')
