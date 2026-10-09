@@ -5,7 +5,7 @@ import {
   type HandlerRequest,
   type HandlerResponse
 } from './_lib/http.js'
-import { getUserFromToken, supabaseAdmin } from './_lib/supabase.js'
+import { getUserFromToken } from './_lib/supabase.js'
 import { validateCouponFor } from './_lib/coupons.js'
 import { isPlanId, quote, type CurrencyCode } from '../src/shared/plans.js'
 
