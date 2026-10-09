@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { DOWNLOADS, SITE } from '@shared/site'
+import { APP_VERSION, DOWNLOADS, SITE } from '@shared/site'
 import { useReveal } from '@/lib/useReveal'
 
 export function FinalCta(): ReactNode {
@@ -20,12 +20,15 @@ export function FinalCta(): ReactNode {
           </a>
           <a
             href={DOWNLOADS.macos}
-            className="rounded-lg border border-white/20 px-6 py-3 text-sm font-semibold text-white transition-colors hover:border-gold hover:text-gold"
+            className="rounded-lg border border-white/25 px-6 py-3 text-sm font-semibold text-white transition-colors hover:border-gold hover:text-gold"
           >
             Download for macOS
           </a>
         </div>
-        <p className="mt-4 text-xs text-white/40">
+        <p className="mt-4 text-xs text-white/70">
+          Windows 10/11 x64 · macOS Apple Silicon · v{APP_VERSION}
+        </p>
+        <p className="mt-1 text-xs text-white/70">
           macOS: right-click the app → Open on first launch (unsigned build)
         </p>
       </div>

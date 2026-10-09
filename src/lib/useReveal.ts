@@ -12,6 +12,10 @@ export function useReveal<T extends HTMLElement>() {
       setShown(true)
       return
     }
+    if (typeof IntersectionObserver === 'undefined') {
+      setShown(true)
+      return
+    }
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {

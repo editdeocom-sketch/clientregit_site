@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { supabase, supabaseConfigured } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
+import { supabaseConfigured } from '@/lib/supabase-env'
 import { SITE } from '@shared/site'
 
 type Mode = 'signin' | 'signup'

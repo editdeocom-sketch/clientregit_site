@@ -8,9 +8,10 @@ export function Demo(): ReactNode {
     <section id="demo" className="border-b border-line bg-surface-2 py-20">
       <div className="mx-auto max-w-6xl px-4">
         <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">See it in action</h2>
+          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Screens from the app</h2>
           <p className="mx-auto mt-3 max-w-xl text-muted">
-            Screens straight from the app. A short walkthrough video is on the way — for now, these are the real thing.
+            Real captures of ClientRegit in use — dashboard, invoicing and project tracking, exactly as the
+            desktop app looks on your machine.
           </p>
         </div>
         <div ref={r.ref} className={`relative mx-auto mt-12 max-w-5xl ${r.className}`}>
@@ -28,7 +29,7 @@ export function Demo(): ReactNode {
             </div>
           </div>
           <p className="mt-5 text-center text-xs text-muted">
-            Full 30–60s demo video coming soon · Screens captured from ClientRegit {new Date().getFullYear()}
+            Captured from the shipping desktop app · Windows and macOS
           </p>
         </div>
       </div>

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { supabase } from './supabase'
 import { FALLBACK_PLANS, type SitePlan } from '@shared/plans'
 
 interface PlanRow {
@@ -34,6 +33,7 @@ let cache: SitePlan[] | null = null
 export async function loadPlans(): Promise<SitePlan[]> {
   if (cache) return cache
   try {
+    const { supabase } = await import('./supabase')
     const { data, error } = await supabase().from('plans').select('*')
     if (error || !data || data.length === 0) return FALLBACK_PLANS
     cache = (data as PlanRow[]).map(rowToPlan).sort((a, b) => a.sortOrder - b.sortOrder)

@@ -1,4 +1,4 @@
-import { SITE } from '@shared/site'
+import { SITE, DOWNLOADS, APP_VERSION } from '@shared/site'
 import { ShotFrame } from './ShotFrame'
 
 function scrollToId(id: string): void {
@@ -18,25 +18,31 @@ export function Hero() {
           <h1 className="mt-4 text-4xl font-extrabold leading-[1.08] tracking-tight md:text-5xl">
             Stop managing clients across five different apps.
           </h1>
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/70">
+          <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/80">
             {SITE.name} brings your clients, projects, revisions and invoices into one simple desktop application.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <button
-              onClick={() => scrollToId('pricing')}
+            <a
+              href={DOWNLOADS.windows}
               className="rounded-lg bg-gold px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gold-strong"
             >
-              Buy {SITE.name}
-            </button>
-            <button
-              onClick={() => scrollToId('demo')}
-              className="rounded-lg border border-white/20 px-6 py-3 text-sm font-semibold text-white transition-colors hover:border-gold hover:text-gold"
+              Download for Windows
+            </a>
+            <a
+              href={DOWNLOADS.macos}
+              className="rounded-lg border border-white/25 px-6 py-3 text-sm font-semibold text-white transition-colors hover:border-gold hover:text-gold"
             >
-              Watch demo
+              Download for macOS
+            </a>
+            <button
+              onClick={() => scrollToId('pricing')}
+              className="cursor-pointer px-2 py-3 text-sm font-semibold text-white/80 underline-offset-4 transition-colors hover:text-gold hover:underline"
+            >
+              See pricing
             </button>
           </div>
-          <p className="mt-5 text-sm text-white/50">
-            Desktop application for Windows &amp; macOS · 7-day free trial, no credit card
+          <p className="mt-5 text-sm text-white/70">
+            7-day free trial, no credit card · Windows 10/11 x64 · macOS Apple Silicon · v{APP_VERSION}
           </p>
         </div>
         <div className="relative">
@@ -46,6 +52,7 @@ export function Hero() {
             alt="ClientRegit dashboard showing revenue, active projects and upcoming deadlines"
             label="Dashboard"
             className="relative"
+            eager
           />
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+export { supabaseConfigured } from './supabase-env'
 
 let client: SupabaseClient | null = null
 
@@ -19,8 +20,4 @@ export function supabase(): SupabaseClient {
     })
   }
   return client
-}
-
-export function supabaseConfigured(): boolean {
-  return Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY)
 }

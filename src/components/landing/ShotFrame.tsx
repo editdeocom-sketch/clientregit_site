@@ -3,9 +3,10 @@ type ShotFrameProps = {
   alt: string
   label?: string
   className?: string
+  eager?: boolean
 }
 
-export function ShotFrame({ src, alt, label, className = '' }: ShotFrameProps) {
+export function ShotFrame({ src, alt, label, className = '', eager = false }: ShotFrameProps) {
   return (
     <div className={`overflow-hidden rounded-xl border border-line bg-surface shadow-2xl ${className}`}>
       <div className="flex items-center gap-1.5 border-b border-line bg-surface-2 px-3 py-2">
@@ -14,7 +15,15 @@ export function ShotFrame({ src, alt, label, className = '' }: ShotFrameProps) {
         <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
         {label && <span className="ml-2 truncate text-xs font-medium text-muted">{label}</span>}
       </div>
-      <img src={src} alt={alt} className="block w-full" loading="lazy" />
+      <img
+        src={src}
+        alt={alt}
+        className="block w-full"
+        width={1783}
+        height={1094}
+        loading={eager ? 'eager' : 'lazy'}
+        fetchPriority={eager ? 'high' : 'auto'}
+      />
     </div>
   )
 }

@@ -4,7 +4,7 @@ import { useSession } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { usePlans } from '@/lib/plans'
 import { formatMoney } from '@shared/plans'
-import { DOWNLOADS, SITE } from '@shared/site'
+import { APP_VERSION, DOWNLOADS, SITE } from '@shared/site'
 
 interface LicenseRow {
   id: string
@@ -471,6 +471,9 @@ export function Account(): ReactNode {
               </div>
             </div>
             <p className="mt-2 text-xs text-muted">
+              Windows 10/11 x64 · macOS Apple Silicon · v{APP_VERSION}
+            </p>
+            <p className="mt-1 text-xs text-muted">
               macOS: right-click the app → Open on first launch (unsigned build)
             </p>
           </div>

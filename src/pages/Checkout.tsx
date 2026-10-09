@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useCurrency } from '@/lib/currency'
 import { useSession } from '@/lib/auth'
 import { usePlans, planById } from '@/lib/plans'
@@ -16,6 +16,7 @@ interface AppliedCoupon {
 
 export function Checkout(): ReactNode {
   const { planId } = useParams()
+  const navigate = useNavigate()
   const { currency } = useCurrency()
   const { session, loading } = useSession()
   const plans = usePlans()
@@ -108,9 +109,16 @@ export function Checkout(): ReactNode {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-14">
-      <Link to="/#pricing" className="text-sm text-muted hover:text-ink">
+      <button
+        type="button"
+        onClick={() => {
+          navigate('/')
+          setTimeout(() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }), 80)
+        }}
+        className="cursor-pointer text-sm text-muted hover:text-ink"
+      >
         ← Back to pricing
-      </Link>
+      </button>
 
       <div className="mt-4 rounded-2xl border border-line bg-surface p-7 shadow-sm">
         <h1 className="text-xl font-bold tracking-tight">Checkout</h1>
