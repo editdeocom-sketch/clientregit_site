@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useCurrency } from '@/lib/currency'
 import { formatMoney, PLANS, PLAN_ORDER, quote } from '@shared/plans'
-import { SITE } from '@shared/site'
+import { DOWNLOADS, SITE } from '@shared/site'
 
 const FEATURES: Array<{ title: string; body: string }> = [
   { title: 'Client profiles', body: 'Every client with contacts, notes and rates — search instantly, archive when done.' },
@@ -24,7 +24,7 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: 'Do you charge GST?',
-    a: 'Prices shown for India are before GST — 18% GST is added at checkout and shown on your invoice with our GSTIN. Customers outside India pay in USD with no GST.'
+    a: 'Prices shown for India are before GST — 18% GST is added at checkout and shown on your invoice. Customers outside India pay in USD with no GST.'
   },
   {
     q: 'Can I use one license on multiple computers?',
@@ -55,10 +55,16 @@ export function Landing(): ReactNode {
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
-            href="/downloads/ClientRegit-Setup-1.0.0.exe"
+            href={DOWNLOADS.windows}
             className="rounded-lg bg-gold px-6 py-3 text-sm font-semibold text-white hover:bg-gold-strong"
           >
             Download for Windows
+          </a>
+          <a
+            href={DOWNLOADS.macos}
+            className="rounded-lg border border-line bg-surface px-6 py-3 text-sm font-semibold hover:border-gold hover:text-gold-strong"
+          >
+            Download for macOS
           </a>
           <button
             onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
@@ -167,12 +173,23 @@ export function Landing(): ReactNode {
         <div className="mx-auto max-w-6xl px-4">
           <h2 className="text-2xl font-bold tracking-tight">Try it free for 7 days</h2>
           <p className="mt-2 text-muted">Download the app, explore everything, then activate.</p>
-          <a
-            href="/downloads/ClientRegit-Setup-1.0.0.exe"
-            className="mt-6 inline-block rounded-lg bg-gold px-6 py-3 text-sm font-semibold text-white hover:bg-gold-strong"
-          >
-            Download for Windows
-          </a>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href={DOWNLOADS.windows}
+              className="inline-block rounded-lg bg-gold px-6 py-3 text-sm font-semibold text-white hover:bg-gold-strong"
+            >
+              Download for Windows
+            </a>
+            <a
+              href={DOWNLOADS.macos}
+              className="inline-block rounded-lg border border-line bg-surface px-6 py-3 text-sm font-semibold hover:border-gold hover:text-gold-strong"
+            >
+              Download for macOS
+            </a>
+          </div>
+          <p className="mt-3 text-xs text-muted">
+            macOS: right-click the app → Open on first launch (unsigned build)
+          </p>
         </div>
       </section>
     </div>

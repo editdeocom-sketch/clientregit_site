@@ -3,7 +3,7 @@ import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { useSession } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { formatMoney, PLANS } from '@shared/plans'
-import { SITE } from '@shared/site'
+import { DOWNLOADS, SITE } from '@shared/site'
 
 interface LicenseRow {
   id: string
@@ -71,7 +71,7 @@ function LicenseCard({ license }: { license: LicenseRow }): ReactNode {
         {license.type === 'perpetual'
           ? 'Lifetime — never expires'
           : license.expires_at
-            ? `Expires ${new Date(license.expires_at).toLocaleDateString()}`
+            ? `Expires ${formatDate(license.expires_at)}`
             : 'Subscription'}
         {' · '}
         In the app: sign in with your account email → paste this key.
@@ -80,9 +80,16 @@ function LicenseCard({ license }: { license: LicenseRow }): ReactNode {
   )
 }
 
+function formatDate(iso: string): string {
+  const d = new Date(iso)
+  const dd = String(d.getDate()).padStart(2, '0')
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  return `${dd}/${mm}/${d.getFullYear()}`
+}
+
 function InvoiceView({ order, onClose }: { order: OrderRow; onClose: () => void }): ReactNode {
   const plan = PLANS[order.plan_id as keyof typeof PLANS]
-  const date = new Date(order.paid_at ?? order.created_at).toLocaleDateString()
+  const date = formatDate(order.paid_at ?? order.created_at)
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4">
       <div className="w-full max-w-lg rounded-xl bg-white p-7 text-sm text-black shadow-xl">
@@ -101,7 +108,6 @@ function InvoiceView({ order, onClose }: { order: OrderRow; onClose: () => void 
             <p className="font-semibold">From</p>
             <p>{SITE.name}</p>
             <p>{SITE.address}</p>
-            <p>GSTIN: {order.currency === 'INR' ? SITE.gstin : '—'}</p>
             <p>{SITE.supportEmail}</p>
           </div>
           <div className="text-right">
@@ -226,6 +232,32 @@ export function Account(): ReactNode {
         </div>
       )}
 
+      <div className="mt-6 rounded-xl border border-line bg-surface p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-semibold tracking-tight">Download the app</h2>
+            <p className="text-sm text-muted">Available for Windows and macOS</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={DOWNLOADS.windows}
+              className="rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong"
+            >
+              Download for Windows
+            </a>
+            <a
+              href={DOWNLOADS.macos}
+              className="rounded-lg border border-line px-4 py-2 text-sm font-semibold hover:border-gold hover:text-gold-strong"
+            >
+              Download for macOS
+            </a>
+          </div>
+          <p className="mt-2 text-xs text-muted">
+            macOS: right-click the app → Open on first launch (unsigned build)
+          </p>
+        </div>
+      </div>
+
       <div className="mt-6 grid grid-cols-2 gap-1 rounded-lg bg-surface-2 p-1 text-sm font-medium">
         <button
           onClick={() => setTab('licenses')}
@@ -290,7 +322,7 @@ export function Account(): ReactNode {
                       {PLANS[order.plan_id as keyof typeof PLANS]?.name ?? order.plan_id} plan
                     </p>
                     <p className="text-xs text-muted">
-                      {new Date(order.paid_at ?? order.created_at).toLocaleDateString()} ·{' '}
+                      {formatDate(order.paid_at ?? order.created_at)} ·{' '}
                       {formatMoney(order.total, order.currency)}
                       {order.tax_amount > 0 ? ' (incl. GST)' : ''}
                     </p>
