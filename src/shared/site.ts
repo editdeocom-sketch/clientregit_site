@@ -6,7 +6,7 @@ export const SITE = {
 } as const
 
 /** Current desktop app version (keep in sync with the app repo). */
-export const APP_VERSION = '1.0.1'
+export const APP_VERSION = '1.1.0'
 
 const RELEASE = 'https://github.com/editdeocom-sketch/clientregit/releases'
 

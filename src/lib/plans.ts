@@ -12,6 +12,11 @@ interface PlanRow {
   active: boolean
   sort_order: number
   highlight: boolean
+  seats?: number | null
+  price_per_seat_inr?: number | null
+  price_per_seat_usd?: number | null
+  compare_at_inr?: number | null
+  compare_at_usd?: number | null
 }
 
 function rowToPlan(row: PlanRow): SitePlan {
@@ -24,7 +29,16 @@ function rowToPlan(row: PlanRow): SitePlan {
     prices: { INR: row.price_inr, USD: row.price_usd },
     active: row.active,
     sortOrder: row.sort_order,
-    highlight: row.highlight
+    highlight: row.highlight,
+    seats: row.seats && row.seats > 0 ? row.seats : 1,
+    pricePerSeat: {
+      INR: row.price_per_seat_inr ?? 0,
+      USD: row.price_per_seat_usd ?? 0
+    },
+    compareAt: {
+      INR: row.compare_at_inr ?? null,
+      USD: row.compare_at_usd ?? null
+    }
   }
 }
 

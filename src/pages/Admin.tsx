@@ -466,6 +466,11 @@ interface PlanFormState {
   active: boolean
   sortOrder: string
   highlight: boolean
+  seats: string
+  pricePerSeatInr: string
+  pricePerSeatUsd: string
+  compareAtInr: string
+  compareAtUsd: string
 }
 
 const EMPTY_PLAN: PlanFormState = {
@@ -478,7 +483,12 @@ const EMPTY_PLAN: PlanFormState = {
   priceUsd: '',
   active: true,
   sortOrder: '0',
-  highlight: false
+  highlight: false,
+  seats: '1',
+  pricePerSeatInr: '',
+  pricePerSeatUsd: '',
+  compareAtInr: '',
+  compareAtUsd: ''
 }
 
 function rowToForm(row: AdminPlanRow): PlanFormState {
@@ -492,7 +502,12 @@ function rowToForm(row: AdminPlanRow): PlanFormState {
     priceUsd: (row.price_usd / 100).toString(),
     active: row.active,
     sortOrder: String(row.sort_order),
-    highlight: row.highlight
+    highlight: row.highlight,
+    seats: String(row.seats ?? 1),
+    pricePerSeatInr: row.price_per_seat_inr ? (row.price_per_seat_inr / 100).toString() : '',
+    pricePerSeatUsd: row.price_per_seat_usd ? (row.price_per_seat_usd / 100).toString() : '',
+    compareAtInr: row.compare_at_inr !== null && row.compare_at_inr !== undefined ? (row.compare_at_inr / 100).toString() : '',
+    compareAtUsd: row.compare_at_usd !== null && row.compare_at_usd !== undefined ? (row.compare_at_usd / 100).toString() : ''
   }
 }
 
@@ -522,6 +537,11 @@ function PlanForm({
     if (!Number.isFinite(priceInr) || priceInr < 0 || !Number.isFinite(priceUsd) || priceUsd < 0) {
       return setError('Prices must be non-negative numbers.')
     }
+    const seats = Math.max(1, Math.round(Number(form.seats) || 1))
+    const pricePerSeatInr = form.pricePerSeatInr.trim() ? Math.round(Number(form.pricePerSeatInr) * 100) : 0
+    const pricePerSeatUsd = form.pricePerSeatUsd.trim() ? Math.round(Number(form.pricePerSeatUsd) * 100) : 0
+    const compareAtInr = form.compareAtInr.trim() ? Math.round(Number(form.compareAtInr) * 100) : null
+    const compareAtUsd = form.compareAtUsd.trim() ? Math.round(Number(form.compareAtUsd) * 100) : null
     setBusy(true)
     setError(null)
     const payload = {
@@ -533,7 +553,12 @@ function PlanForm({
       priceUsd,
       active: form.active,
       sortOrder: Number(form.sortOrder) || 0,
-      highlight: form.highlight
+      highlight: form.highlight,
+      seats,
+      pricePerSeatInr,
+      pricePerSeatUsd,
+      compareAtInr,
+      compareAtUsd
     }
     try {
       if (editing) {
@@ -618,6 +643,56 @@ function PlanForm({
             value={form.sortOrder}
             onChange={(e) => set('sortOrder', e.target.value)}
             inputMode="numeric"
+            className={input}
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs font-medium text-muted">Seats (machines)</span>
+          <input
+            value={form.seats}
+            onChange={(e) => set('seats', e.target.value)}
+            inputMode="numeric"
+            placeholder="1"
+            className={input}
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs font-medium text-muted">Extra member ₹ (one-time)</span>
+          <input
+            value={form.pricePerSeatInr}
+            onChange={(e) => set('pricePerSeatInr', e.target.value)}
+            inputMode="decimal"
+            placeholder="299"
+            className={input}
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs font-medium text-muted">Extra member $ (one-time)</span>
+          <input
+            value={form.pricePerSeatUsd}
+            onChange={(e) => set('pricePerSeatUsd', e.target.value)}
+            inputMode="decimal"
+            placeholder="5"
+            className={input}
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs font-medium text-muted">Compare-at ₹ (strike-through, optional)</span>
+          <input
+            value={form.compareAtInr}
+            onChange={(e) => set('compareAtInr', e.target.value)}
+            inputMode="decimal"
+            placeholder="2399"
+            className={input}
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs font-medium text-muted">Compare-at $ (strike-through, optional)</span>
+          <input
+            value={form.compareAtUsd}
+            onChange={(e) => set('compareAtUsd', e.target.value)}
+            inputMode="decimal"
+            placeholder="19"
             className={input}
           />
         </label>
@@ -741,6 +816,7 @@ function PlansTab(): ReactNode {
                 <th className={TH}>Type</th>
                 <th className={TH}>₹ (INR)</th>
                 <th className={TH}>$ (USD)</th>
+                <th className={TH}>Seats</th>
                 <th className={TH}>Sort</th>
                 <th className={TH}>Status</th>
                 <th className={TH}>Actions</th>
@@ -763,6 +839,7 @@ function PlansTab(): ReactNode {
                   </td>
                   <td className={TD}>{formatMoney(p.price_inr, 'INR')}</td>
                   <td className={TD}>{formatMoney(p.price_usd, 'USD')}</td>
+                  <td className={`${TD} text-muted`}>{p.seats && p.seats > 1 ? p.seats : '—'}</td>
                   <td className={`${TD} text-muted`}>{p.sort_order}</td>
                   <td className={TD}>
                     <span

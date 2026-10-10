@@ -8,7 +8,7 @@
 } from './_lib/http.js'
 import { getUserFromToken, supabaseAdmin } from './_lib/supabase.js'
 import { validateCouponFor } from './_lib/coupons.js'
-import { planSubtotal, requireActivePlan, taxPercentFor } from './_lib/plans.js'
+import { planSeats, planSubtotalFor, requireActivePlan, taxPercentFor } from './_lib/plans.js'
 import { createRazorpayOrder, isMockPayments, razorpayKeyId } from './_lib/razorpay.js'
 import type { CurrencyCode } from '../src/shared/plans.js'
 import crypto from 'node:crypto'
@@ -32,7 +32,30 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
 
     const plan = await requireActivePlan(planId)
     const currencyCode = currency as CurrencyCode
-    const subtotal = planSubtotal(plan, currencyCode)
+
+    let extraSeats = 0
+    let kind: 'plan' | 'seat_addon' = 'plan'
+    if (body.extraSeats !== undefined && body.extraSeats !== null) {
+      const n = body.extraSeats
+      if (typeof n !== 'number' || !Number.isInteger(n) || n < 0 || n > 50) {
+        throw new HttpError(400, 'extraSeats must be an integer between 0 and 50.')
+      }
+      if (planSeats(plan) <= 1 && n > 0) {
+        throw new HttpError(400, 'Extra members are only available on Team plans.')
+      }
+      extraSeats = n
+    }
+    if (body.mode === 'seat_addon') {
+      if (planSeats(plan) <= 1) throw new HttpError(400, 'Extra members are only available on Team plans.')
+      if (extraSeats < 1) throw new HttpError(400, 'Choose at least one extra member.')
+      kind = 'seat_addon'
+    }
+
+    const seatsPurchased = planSeats(plan) + extraSeats
+    const subtotal =
+      kind === 'seat_addon'
+        ? planSubtotalFor(plan, currencyCode, extraSeats) - planSubtotalFor(plan, currencyCode, 0)
+        : planSubtotalFor(plan, currencyCode, extraSeats)
     const taxPercent = taxPercentFor(currencyCode)
 
     let discountAmount = 0
@@ -65,7 +88,13 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
         amount: total,
         currency,
         receipt: `cr_${Date.now()}`,
-        notes: { userId: user.id, planId, ...(appliedCouponCode ? { coupon: appliedCouponCode } : {}) }
+        notes: {
+          userId: user.id,
+          planId,
+          extraSeats: String(extraSeats),
+          mode: kind,
+          ...(appliedCouponCode ? { coupon: appliedCouponCode } : {})
+        }
       })
     }
 
@@ -80,7 +109,10 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
       discount_amount: discountAmount,
       coupon_code: appliedCouponCode,
       total,
-      status: 'created'
+      status: 'created',
+      extra_seats: extraSeats,
+      seats_purchased: seatsPurchased,
+      kind
     })
     if (insertError) throw new Error(`Could not record the order: ${insertError.message}`)
 

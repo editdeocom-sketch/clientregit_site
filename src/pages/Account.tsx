@@ -3,6 +3,7 @@ import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { useSession } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { usePlans } from '@/lib/plans'
+import { fetchLicenseSeats, type LicenseSeatInfo } from '@/lib/api'
 import { formatMoney } from '@shared/plans'
 import { APP_VERSION, DOWNLOADS, SITE } from '@shared/site'
 
@@ -14,6 +15,19 @@ interface LicenseRow {
   status: 'active' | 'revoked'
   expires_at: string | null
   created_at: string
+  seats?: number
+  seats_used?: number
+}
+
+interface SeatInfo {
+  licenseId: string
+  licenseKey: string
+  planId: string
+  status: string
+  expiresAt: string | null
+  seats: number
+  seatsUsed: number
+  devices: Array<{ device_id: string; label: string | null; last_seen_at: string }>
 }
 
 interface OrderRow {
@@ -39,7 +53,15 @@ function maskKey(key: string): string {
   return [parts[0], '••••', '••••', '••••', parts[4]].join('-')
 }
 
-function LicenseCard({ license, planName }: { license: LicenseRow; planName: (id: string) => string }): ReactNode {
+function LicenseCard({
+  license,
+  planName,
+  seatInfo
+}: {
+  license: LicenseRow
+  planName: (id: string) => string
+  seatInfo?: SeatInfo
+}): ReactNode {
   const [copied, setCopied] = useState(false)
   const [revealed, setRevealed] = useState(false)
   const copy = async (): Promise<void> => {
@@ -52,6 +74,9 @@ function LicenseCard({ license, planName }: { license: LicenseRow; planName: (id
     }
   }
   const expired = license.expires_at && new Date(license.expires_at).getTime() < Date.now()
+  const seats = seatInfo?.seats ?? license.seats ?? 1
+  const seatsUsed = seatInfo?.seatsUsed ?? license.seats_used ?? 0
+  const isTeam = seats > 1
   return (
     <div className="rounded-xl border border-line bg-surface p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -98,6 +123,41 @@ function LicenseCard({ license, planName }: { license: LicenseRow; planName: (id
       <p className="mt-1 text-xs text-muted">
         In the app: sign in with your account email → paste this key.
       </p>
+
+      {isTeam && (
+        <div className="mt-4 rounded-lg border border-line bg-canvas p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+            <span className="font-semibold">
+              {seatsUsed} of {seats} seats used
+            </span>
+            <Link
+              to={`/checkout/${license.plan_id}?mode=seat_addon&qty=1`}
+              className="rounded-md border border-line bg-surface px-2.5 py-1 text-xs font-semibold hover:border-gold hover:text-gold-strong"
+            >
+              + Add seats (₹299 / $5)
+            </Link>
+          </div>
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-2" role="progressbar" aria-valuenow={seatsUsed} aria-valuemin={0} aria-valuemax={seats}>
+            <div
+              className="h-full rounded-full bg-gold transition-all"
+              style={{ width: `${Math.min(100, Math.round((seatsUsed / seats) * 100))}%` }}
+            />
+          </div>
+          {seatInfo && seatInfo.devices.length > 0 && (
+            <ul className="mt-3 space-y-1.5 text-xs text-muted">
+              {seatInfo.devices.map((device) => (
+                <li key={device.device_id} className="flex items-center justify-between gap-2">
+                  <span className="truncate font-mono">{device.label || device.device_id.slice(0, 12)}</span>
+                  <span>seen {formatDate(device.last_seen_at)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-2 text-[11px] text-muted">
+            Team plans verify seats online each time the app opens. Deactivate a machine in the app to free its seat.
+          </p>
+        </div>
+      )}
     </div>
   )
 }
@@ -305,6 +365,7 @@ export function Account(): ReactNode {
   )
   const [licenses, setLicenses] = useState<LicenseRow[] | null>(null)
   const [orders, setOrders] = useState<OrderRow[] | null>(null)
+  const [seatInfo, setSeatInfo] = useState<LicenseSeatInfo[] | null>(null)
   const [invoice, setInvoice] = useState<OrderRow | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -321,6 +382,11 @@ export function Account(): ReactNode {
       setLicenses(licenseResult.data as LicenseRow[])
       setOrders(orderResult.data as OrderRow[])
       setIsAdmin(Boolean((profileResult.data as { is_admin?: boolean } | null)?.is_admin))
+      fetchLicenseSeats()
+        .then(setSeatInfo)
+        .catch(() => {
+          // seat meter falls back to values on the licenses row
+        })
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
     }
@@ -497,7 +563,17 @@ export function Account(): ReactNode {
               </Link>
             </div>
           ) : (
-            licenses.map((license) => <LicenseCard key={license.id} license={license} planName={planName} />)
+            licenses.map((license) => (
+              <LicenseCard
+                key={license.id}
+                license={license}
+                planName={planName}
+                seatInfo={
+                  seatInfo?.find((s) => s.licenseId === license.id) ??
+                  seatInfo?.find((s) => s.licenseKey === license.license_key)
+                }
+              />
+            ))
           )}
         </div>
       )}

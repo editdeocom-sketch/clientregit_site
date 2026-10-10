@@ -13,6 +13,9 @@ export interface DbPlan {
   active: boolean
   sort_order: number
   highlight: boolean
+  seats?: number | null
+  price_per_seat_inr?: number | null
+  price_per_seat_usd?: number | null
 }
 
 const CACHE_TTL_MS = 60_000
@@ -39,6 +42,21 @@ export async function requireActivePlan(planId: string): Promise<DbPlan> {
 
 export function planSubtotal(plan: DbPlan, currency: CurrencyCode): number {
   return currency === 'INR' ? plan.price_inr : plan.price_usd
+}
+
+export function planSeats(plan: DbPlan): number {
+  return plan.seats && plan.seats > 0 ? plan.seats : 1
+}
+
+export function perSeatPrice(plan: DbPlan, currency: CurrencyCode): number {
+  if (planSeats(plan) <= 1) return 0
+  return currency === 'INR' ? plan.price_per_seat_inr ?? 0 : plan.price_per_seat_usd ?? 0
+}
+
+export function planSubtotalFor(plan: DbPlan, currency: CurrencyCode, extraSeats = 0): number {
+  const base = planSubtotal(plan, currency)
+  const extras = perSeatPrice(plan, currency) * Math.max(0, extraSeats)
+  return base + extras
 }
 
 export function taxPercentFor(currency: CurrencyCode): number {

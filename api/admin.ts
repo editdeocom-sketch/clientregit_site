@@ -146,11 +146,44 @@ function parsePlanFields(body: Record<string, unknown>, partial: boolean): Recor
     if (typeof body.highlight !== 'boolean') throw new HttpError(400, 'highlight must be boolean.')
     patch.highlight = body.highlight
   }
+  if (body.seats !== undefined) {
+    const seats = body.seats
+    if (typeof seats !== 'number' || !Number.isInteger(seats) || seats < 1 || seats > 100) {
+      throw new HttpError(400, 'seats must be an integer between 1 and 100.')
+    }
+    patch.seats = seats
+  }
+  for (const key of ['pricePerSeatInr', 'pricePerSeatUsd'] as const) {
+    if (body[key] !== undefined) {
+      const column = key === 'pricePerSeatInr' ? 'price_per_seat_inr' : 'price_per_seat_usd'
+      const value = body[key]
+      if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) {
+        throw new HttpError(400, `${key} must be a non-negative integer (minor units).`)
+      }
+      patch[column] = value
+    }
+  }
+  for (const key of ['compareAtInr', 'compareAtUsd'] as const) {
+    if (body[key] !== undefined) {
+      const column = key === 'compareAtInr' ? 'compare_at_inr' : 'compare_at_usd'
+      const value = body[key]
+      if (value === null) {
+        patch[column] = null
+      } else if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) {
+        throw new HttpError(400, `${key} must be a non-negative integer or null (minor units).`)
+      } else {
+        patch[column] = value
+      }
+    }
+  }
   if (!partial && patch.months === undefined) patch.months = null
   if (!partial && patch.blurb === undefined) patch.blurb = ''
   if (!partial && patch.active === undefined) patch.active = true
   if (!partial && patch.sort_order === undefined) patch.sort_order = 0
   if (!partial && patch.highlight === undefined) patch.highlight = false
+  if (!partial && patch.seats === undefined) patch.seats = 1
+  if (!partial && patch.price_per_seat_inr === undefined) patch.price_per_seat_inr = 0
+  if (!partial && patch.price_per_seat_usd === undefined) patch.price_per_seat_usd = 0
   if (patch.license_type === 'perpetual') patch.months = null
   if (patch.license_type === 'subscription' && patch.months === undefined && !partial) {
     throw new HttpError(400, 'Subscription plans need months >= 1.')

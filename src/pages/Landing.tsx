@@ -29,7 +29,11 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: 'Can I use one license on multiple computers?',
-    a: 'A license activates the account on your machines — sign in on each. Need more seats for a team? Email support.'
+    a: 'Individual plans cover one computer. Team plans come with seats — one key works on up to 5, 8 or 10 machines. Need more members? Add seats from your account for ₹299 / $5 each, and they stay added for good.'
+  },
+  {
+    q: 'Do Team plans need internet?',
+    a: 'Yes — Team keys verify seats online every time the app opens, so each machine checks it still has a free seat. Individual keys work fully offline after activation.'
   },
   {
     q: 'Where is my data stored?',

@@ -30,9 +30,16 @@ export interface CreateOrderResult {
 export function createOrder(
   planId: PlanId,
   currency: CurrencyCode,
-  couponCode?: string
+  couponCode?: string,
+  options?: { extraSeats?: number; mode?: 'plan' | 'seat_addon' }
 ): Promise<CreateOrderResult> {
-  return postJson<CreateOrderResult>('/api/create-order', { planId, currency, couponCode })
+  return postJson<CreateOrderResult>('/api/create-order', {
+    planId,
+    currency,
+    couponCode,
+    extraSeats: options?.extraSeats ?? 0,
+    mode: options?.mode ?? 'plan'
+  })
 }
 
 export interface VerifyResult {
@@ -57,6 +64,34 @@ export function validateCoupon(
   currency: CurrencyCode
 ): Promise<CouponValidation> {
   return postJson<CouponValidation>('/api/validate-coupon', { couponCode, planId, currency })
+}
+
+export interface LicenseSeatDevice {
+  device_id: string
+  label: string | null
+  last_seen_at: string
+}
+
+export interface LicenseSeatInfo {
+  licenseId: string
+  licenseKey: string
+  planId: string
+  status: string
+  expiresAt: string | null
+  seats: number
+  seatsUsed: number
+  devices: LicenseSeatDevice[]
+}
+
+export async function fetchLicenseSeats(): Promise<LicenseSeatInfo[]> {
+  const headers = await authHeaders()
+  const response = await fetch('/api/license-seats', { headers })
+  const payload = (await response.json().catch(() => ({}))) as {
+    error?: string
+    seats?: LicenseSeatInfo[]
+  }
+  if (!response.ok) throw new Error(payload.error || `Request failed (${response.status})`)
+  return payload.seats ?? []
 }
 
 // ---------------------------------------------------------------------------
@@ -184,6 +219,11 @@ export interface AdminPlanRow {
   active: boolean
   sort_order: number
   highlight: boolean
+  seats: number
+  price_per_seat_inr: number
+  price_per_seat_usd: number
+  compare_at_inr: number | null
+  compare_at_usd: number | null
   created_at: string
 }
 
@@ -202,6 +242,11 @@ export interface PlanPayload {
   active: boolean
   sortOrder: number
   highlight: boolean
+  seats: number
+  pricePerSeatInr: number
+  pricePerSeatUsd: number
+  compareAtInr: number | null
+  compareAtUsd: number | null
 }
 
 export function adminCreatePlan(plan: PlanPayload): Promise<{ ok: boolean }> {
