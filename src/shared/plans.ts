@@ -94,7 +94,7 @@ export const FALLBACK_PLANS: SitePlan[] = [
     highlight: true,
     seats: 8,
     pricePerSeat: { INR: 29900, USD: 500 },
-    compareAt: { INR: 269900, USD: 3200 }
+    compareAt: { INR: 299900, USD: 3200 }
   },
   {
     id: 'team-10',
