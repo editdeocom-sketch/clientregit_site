@@ -4,6 +4,7 @@ import { useSession } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { usePlans } from '@/lib/plans'
 import { fetchLicenseSeats, type LicenseSeatInfo } from '@/lib/api'
+import { TeamTab } from '@/components/account/TeamTab'
 import { formatMoney } from '@shared/plans'
 import { APP_VERSION, DOWNLOADS, SITE } from '@shared/site'
 
@@ -360,8 +361,8 @@ export function Account(): ReactNode {
   const [params] = useSearchParams()
   const allPlans = usePlans()
   const planName = (id: string): string => allPlans?.find((p) => p.id === id)?.name ?? id
-  const [tab, setTab] = useState<'overview' | 'licenses' | 'orders' | 'settings'>(
-    params.get('paid') ? 'orders' : 'overview'
+  const [tab, setTab] = useState<'overview' | 'licenses' | 'orders' | 'team' | 'settings'>(
+    params.get('paid') ? 'orders' : params.get('tab') === 'team' ? 'team' : 'overview'
   )
   const [licenses, setLicenses] = useState<LicenseRow[] | null>(null)
   const [orders, setOrders] = useState<OrderRow[] | null>(null)
@@ -418,6 +419,15 @@ export function Account(): ReactNode {
   const activeLicenses = (licenses ?? []).filter(
     (l) => l.status === 'active' && (!l.expires_at || new Date(l.expires_at).getTime() > Date.now())
   )
+  const teamLicenses = activeLicenses
+    .filter((l) => (l.seats ?? 1) > 1)
+    .map((l) => ({
+      id: l.id,
+      plan_id: l.plan_id,
+      license_key: l.license_key,
+      seats: l.seats ?? 1,
+      expires_at: l.expires_at
+    }))
 
   const memberSince = (session.user as { created_at?: string }).created_at
     ? formatDate((session.user as { created_at: string }).created_at)
@@ -454,8 +464,8 @@ export function Account(): ReactNode {
         </div>
       )}
 
-      <div className="mt-6 grid grid-cols-4 gap-1 rounded-lg bg-surface-2 p-1 text-sm font-medium">
-        {(['overview', 'licenses', 'orders', 'settings'] as const).map((id) => (
+      <div className="mt-6 grid grid-cols-5 gap-1 rounded-lg bg-surface-2 p-1 text-sm font-medium">
+        {(['overview', 'licenses', 'orders', 'team', 'settings'] as const).map((id) => (
           <button
             key={id}
             onClick={() => setTab(id)}
@@ -615,6 +625,14 @@ export function Account(): ReactNode {
               ))
           )}
         </div>
+      )}
+
+      {tab === 'team' && (
+        <TeamTab
+          userId={session.user.id}
+          userEmail={session.user.email ?? ''}
+          teamLicenses={teamLicenses}
+        />
       )}
 
       {tab === 'settings' && <SettingsPanel email={session.user.email ?? ''} />}
