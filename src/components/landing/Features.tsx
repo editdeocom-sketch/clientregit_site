@@ -49,6 +49,32 @@ const ROWS: Array<{
     src: '/shots/reports.png',
     alt: 'ClientRegit reports page with monthly revenue charts and project stats',
     label: 'Reports'
+  },
+  {
+    title: 'Video meetings',
+    body: 'Meet clients right inside ClientRegit — schedule a call, share the link, and jump in. No extra apps, no accounts for guests.',
+    bullets: [
+      'Up to 6 people per call with screen sharing',
+      'In-call chat, reactions and local .webm recording',
+      'Waiting room, shareable link and 10-char join code',
+      'Guests join from any browser — nothing to install'
+    ],
+    src: '/shots/meeting-room.png',
+    alt: 'ClientRegit meeting room with screen share, participants and call controls',
+    label: 'Meeting'
+  },
+  {
+    title: 'Desktop notifications & tray',
+    body: 'Close the window and ClientRegit keeps running in the tray — the alerts you care about keep arriving.',
+    bullets: [
+      'Meeting invites, reminders and live alerts',
+      'Direct messages, task assignments and team events',
+      'Per-category toggles — pick what deserves your attention',
+      'Quitting is a choice, not an accident'
+    ],
+    src: '/shots/notifications.png',
+    alt: 'ClientRegit notification settings with toggles for meetings, messages, tasks and team events',
+    label: 'Notifications'
   }
 ]
 
@@ -87,7 +113,7 @@ export function Features(): ReactNode {
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Everything a creative business needs</h2>
           <p className="mx-auto mt-3 max-w-2xl text-muted">
-            Real screens from the app — no mockups, no vaporware. Every feature below ships in version 1.0.1.
+            Real screens from the app — no mockups, no vaporware. Every feature below ships in version 1.2.0.
           </p>
         </div>
         {ROWS.map((row, i) => (
