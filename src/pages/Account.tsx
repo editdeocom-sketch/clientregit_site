@@ -283,8 +283,8 @@ function SettingsPanel({ email, fullName, phone }: { email: string; fullName: st
 
   const submit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
-    if (password.length < 8) {
-      setMessage({ ok: false, text: 'Password must be at least 8 characters.' })
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(password)) {
+      setMessage({ ok: false, text: 'Password must be at least 8 characters with uppercase, lowercase, number & symbol.' })
       return
     }
     if (password !== confirm) {

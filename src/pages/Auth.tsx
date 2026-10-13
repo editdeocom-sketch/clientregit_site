@@ -6,7 +6,8 @@ import { SITE } from '@shared/site'
 
 type Mode = 'signin' | 'signup' | 'forgot'
 
-const PASSWORD_RULE = '6–10 characters, letters and numbers only'
+const PASSWORD_RULE = 'At least 8 characters with uppercase, lowercase, number & symbol'
+const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/
 
 function EyeIcon({ off }: { off: boolean }): ReactNode {
   return off ? (
@@ -58,8 +59,8 @@ export function Auth(): ReactNode {
       if (mode === 'signup') {
         if (!fullName.trim()) throw new Error('Full name is required.')
         if (!phone.trim()) throw new Error('Phone number is required.')
-        if (!/^[A-Za-z0-9]+$/.test(password) || password.length < 6 || password.length > 10) {
-          throw new Error(`Password must be ${PASSWORD_RULE}.`)
+        if (!PASSWORD_RE.test(password)) {
+          throw new Error(`Password must be ${PASSWORD_RULE.toLowerCase()}.`)
         }
         if (!accepted) {
           throw new Error('Please accept the Privacy Policy, Terms & Conditions, and Refund Policy.')
@@ -193,11 +194,10 @@ export function Auth(): ReactNode {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
-                  minLength={mode === 'signup' ? 6 : undefined}
-                  maxLength={mode === 'signup' ? 10 : undefined}
+                  minLength={mode === 'signup' ? 8 : undefined}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  placeholder={mode === 'signup' ? PASSWORD_RULE : 'At least 6 characters'}
+                  placeholder={mode === 'signup' ? 'Uppercase, lowercase, number & symbol' : 'At least 6 characters'}
                   className="w-full rounded-lg border border-line bg-canvas px-3 py-2 pr-10 text-sm outline-none focus:border-gold"
                 />
                 <button

@@ -40,8 +40,8 @@ export function ResetPassword(): ReactNode {
   }, [])
 
   const submit = async (): Promise<void> => {
-    if (password.length < 8) {
-      setMessage({ kind: 'error', text: 'Password must be at least 8 characters.' })
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(password)) {
+      setMessage({ kind: 'error', text: 'Password must be at least 8 characters with uppercase, lowercase, number & symbol.' })
       return
     }
     if (password !== confirm) {
@@ -114,7 +114,7 @@ export function ResetPassword(): ReactNode {
               minLength={8}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="At least 8 characters"
+              placeholder="Uppercase, lowercase, number & symbol"
               className="w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm outline-none focus:border-gold"
             />
           </label>
