@@ -270,11 +270,16 @@ function InvoiceView({
   )
 }
 
-function SettingsPanel({ email }: { email: string }): ReactNode {
+function SettingsPanel({ email, fullName, phone }: { email: string; fullName: string; phone: string }): ReactNode {
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
+
+  const [editName, setEditName] = useState(fullName)
+  const [editPhone, setEditPhone] = useState(phone)
+  const [profileBusy, setProfileBusy] = useState(false)
+  const [profileMessage, setProfileMessage] = useState<{ ok: boolean; text: string } | null>(null)
 
   const submit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
@@ -299,16 +304,79 @@ function SettingsPanel({ email }: { email: string }): ReactNode {
     setMessage({ ok: true, text: 'Password updated.' })
   }
 
+  const saveProfile = async (e: React.FormEvent): Promise<void> => {
+    e.preventDefault()
+    setProfileBusy(true)
+    setProfileMessage(null)
+    const { data, error } = await supabase().auth.updateUser({
+      data: { full_name: editName.trim(), phone: editPhone.trim() }
+    })
+    if (!error && data.user) {
+      const meta = (data.user.user_metadata ?? {}) as Record<string, unknown>
+      await supabase().from('profiles').upsert({
+        id: data.user.id,
+        full_name: typeof meta.full_name === 'string' ? meta.full_name : null,
+        phone: typeof meta.phone === 'string' ? meta.phone : null
+      })
+    }
+    setProfileBusy(false)
+    if (error) {
+      setProfileMessage({ ok: false, text: error.message })
+      return
+    }
+    setProfileMessage({ ok: true, text: 'Profile saved — synced to your app too.' })
+  }
+
   return (
     <div className="mt-6 space-y-6">
       <div className="rounded-xl border border-line bg-surface p-5">
         <h2 className="font-semibold tracking-tight">Profile</h2>
-        <dl className="mt-3 space-y-2 text-sm">
-          <div className="flex justify-between gap-4">
-            <dt className="text-muted">Email</dt>
-            <dd className="font-medium">{email}</dd>
+        <form onSubmit={(e) => void saveProfile(e)} className="mt-3 space-y-3">
+          <div>
+            <label className="block text-xs font-medium text-muted" htmlFor="profile-name">
+              Full name
+            </label>
+            <input
+              id="profile-name"
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="Your full name"
+              className="mt-1 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm focus:border-gold focus:outline-none"
+            />
           </div>
-        </dl>
+          <div>
+            <label className="block text-xs font-medium text-muted" htmlFor="profile-phone">
+              Phone number
+            </label>
+            <input
+              id="profile-phone"
+              type="tel"
+              value={editPhone}
+              onChange={(e) => setEditPhone(e.target.value)}
+              placeholder="+91 98765 43210"
+              className="mt-1 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm focus:border-gold focus:outline-none"
+            />
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dl className="text-xs text-muted">
+              <dt className="font-medium">Email</dt>
+              <dd>{email}</dd>
+            </dl>
+            <button
+              type="submit"
+              disabled={profileBusy}
+              className="cursor-pointer rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
+            >
+              {profileBusy ? 'Saving…' : 'Save profile'}
+            </button>
+          </div>
+          {profileMessage && (
+            <p className={`text-sm ${profileMessage.ok ? 'text-success' : 'text-danger'}`}>
+              {profileMessage.text}
+            </p>
+          )}
+        </form>
       </div>
 
       <div className="rounded-xl border border-line bg-surface p-5">
@@ -438,6 +506,11 @@ export function Account(): ReactNode {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Your account</h1>
+          {((session.user.user_metadata ?? {}) as { full_name?: string }).full_name && (
+            <p className="text-sm font-medium">
+              {((session.user.user_metadata ?? {}) as { full_name?: string }).full_name}
+            </p>
+          )}
           <p className="text-sm text-muted">{session.user.email}</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -635,7 +708,13 @@ export function Account(): ReactNode {
         />
       )}
 
-      {tab === 'settings' && <SettingsPanel email={session.user.email ?? ''} />}
+      {tab === 'settings' && (
+        <SettingsPanel
+          email={session.user.email ?? ''}
+          fullName={((session.user.user_metadata ?? {}) as { full_name?: string }).full_name ?? ''}
+          phone={((session.user.user_metadata ?? {}) as { phone?: string }).phone ?? ''}
+        />
+      )}
 
       {invoice && <InvoiceView order={invoice} planName={planName} onClose={() => setInvoice(null)} />}
     </div>
