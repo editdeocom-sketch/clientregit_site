@@ -270,17 +270,11 @@ function InvoiceView({
   )
 }
 
-function SettingsPanel({ email, userPhone }: { email: string; userPhone: string | null }): ReactNode {
+function SettingsPanel({ email }: { email: string }): ReactNode {
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
-
-  const [phone, setPhone] = useState(userPhone ?? '')
-  const [otp, setOtp] = useState('')
-  const [otpSent, setOtpSent] = useState(false)
-  const [phoneBusy, setPhoneBusy] = useState(false)
-  const [phoneMessage, setPhoneMessage] = useState<{ ok: boolean; text: string } | null>(null)
 
   const submit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
@@ -303,47 +297,6 @@ function SettingsPanel({ email, userPhone }: { email: string; userPhone: string 
     setPassword('')
     setConfirm('')
     setMessage({ ok: true, text: 'Password updated.' })
-  }
-
-  const sendPhoneOtp = async (): Promise<void> => {
-    const trimmed = phone.trim()
-    if (!trimmed) {
-      setPhoneMessage({ ok: false, text: 'Enter a phone number first.' })
-      return
-    }
-    setPhoneBusy(true)
-    setPhoneMessage(null)
-    const { error } = await supabase().auth.updateUser({ phone: trimmed })
-    setPhoneBusy(false)
-    if (error) {
-      setPhoneMessage({ ok: false, text: error.message })
-      return
-    }
-    setOtpSent(true)
-    setPhoneMessage({ ok: true, text: 'OTP sent — check your SMS.' })
-  }
-
-  const verifyPhoneOtp = async (): Promise<void> => {
-    const trimmedOtp = otp.trim()
-    if (!trimmedOtp) {
-      setPhoneMessage({ ok: false, text: 'Enter the OTP code.' })
-      return
-    }
-    setPhoneBusy(true)
-    setPhoneMessage(null)
-    const { error } = await supabase().auth.verifyOtp({
-      phone: phone.trim(),
-      token: trimmedOtp,
-      type: 'phone_change'
-    })
-    setPhoneBusy(false)
-    if (error) {
-      setPhoneMessage({ ok: false, text: error.message })
-      return
-    }
-    setOtpSent(false)
-    setOtp('')
-    setPhoneMessage({ ok: true, text: 'Phone number verified!' })
   }
 
   return (
@@ -398,86 +351,6 @@ function SettingsPanel({ email, userPhone }: { email: string; userPhone: string 
             {busy ? 'Updating…' : 'Update password'}
           </button>
         </form>
-      </div>
-
-      <div className="rounded-xl border border-line bg-surface p-5">
-        <h2 className="font-semibold tracking-tight">Phone verification</h2>
-        <p className="mt-1 text-sm text-muted">
-          {userPhone
-            ? `Verified phone: ${userPhone}`
-            : 'Add a phone number for extra account security.'}
-        </p>
-        <div className="mt-3 space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-muted" htmlFor="phone-number">
-              Phone number (with country code)
-            </label>
-            <input
-              id="phone-number"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+91 98765 43210"
-              disabled={otpSent}
-              className="mt-1 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm focus:border-gold focus:outline-none disabled:opacity-50"
-            />
-          </div>
-          {otpSent && (
-            <div>
-              <label className="block text-xs font-medium text-muted" htmlFor="otp-code">
-                Enter OTP
-              </label>
-              <input
-                id="otp-code"
-                type="text"
-                inputMode="numeric"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                placeholder="6-digit code"
-                className="mt-1 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm focus:border-gold focus:outline-none"
-              />
-            </div>
-          )}
-          {phoneMessage && (
-            <p className={`text-sm ${phoneMessage.ok ? 'text-success' : 'text-danger'}`}>
-              {phoneMessage.text}
-            </p>
-          )}
-          <div className="flex gap-2">
-            {!otpSent ? (
-              <button
-                type="button"
-                onClick={() => void sendPhoneOtp()}
-                disabled={phoneBusy}
-                className="cursor-pointer rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
-              >
-                {phoneBusy ? 'Sending…' : 'Send OTP'}
-              </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => void verifyPhoneOtp()}
-                  disabled={phoneBusy}
-                  className="cursor-pointer rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
-                >
-                  {phoneBusy ? 'Verifying…' : 'Verify OTP'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOtpSent(false)
-                    setOtp('')
-                    setPhoneMessage(null)
-                  }}
-                  className="cursor-pointer rounded-lg border border-line px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold-strong"
-                >
-                  Cancel
-                </button>
-              </>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   )
@@ -762,9 +635,7 @@ export function Account(): ReactNode {
         />
       )}
 
-      {tab === 'settings' && (
-        <SettingsPanel email={session.user.email ?? ''} userPhone={(session.user as { phone?: string | null }).phone ?? null} />
-      )}
+      {tab === 'settings' && <SettingsPanel email={session.user.email ?? ''} />}
 
       {invoice && <InvoiceView order={invoice} planName={planName} onClose={() => setInvoice(null)} />}
     </div>
