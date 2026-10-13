@@ -5,6 +5,7 @@ import { SiteLayout } from '@/components/SiteLayout'
 import { Landing } from '@/pages/Landing'
 
 const Auth = lazy(() => import('@/pages/Auth').then((m) => ({ default: m.Auth })))
+const ResetPassword = lazy(() => import('@/pages/ResetPassword').then((m) => ({ default: m.ResetPassword })))
 const Checkout = lazy(() => import('@/pages/Checkout').then((m) => ({ default: m.Checkout })))
 const Account = lazy(() => import('@/pages/Account').then((m) => ({ default: m.Account })))
 const Admin = lazy(() => import('@/pages/Admin').then((m) => ({ default: m.Admin })))
@@ -21,6 +22,7 @@ export function App(): ReactNode {
         <Route element={<SiteLayout />}>
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/checkout/:planId" element={<Checkout />} />
           <Route path="/account" element={<Account />} />
           <Route path="/admin" element={<Admin />} />
