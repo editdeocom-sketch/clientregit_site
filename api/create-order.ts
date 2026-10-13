@@ -10,6 +10,7 @@ import { getUserFromToken, supabaseAdmin } from './_lib/supabase.js'
 import { validateCouponFor } from './_lib/coupons.js'
 import { planSeats, planSubtotalFor, requireActivePlan, taxPercentFor } from './_lib/plans.js'
 import { createRazorpayOrder, isMockPayments, razorpayKeyId } from './_lib/razorpay.js'
+import { fulfillOrder } from './_lib/fulfill.js'
 import type { CurrencyCode } from '../src/shared/plans.js'
 import crypto from 'node:crypto'
 
@@ -81,7 +82,9 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
     const total = discountedSubtotal + tax
 
     let orderId: string
-    if (isMockPayments()) {
+    if (total <= 0) {
+      orderId = `order_free_${crypto.randomBytes(6).toString('hex')}`
+    } else if (isMockPayments()) {
       orderId = `order_mock_${crypto.randomBytes(6).toString('hex')}`
     } else {
       orderId = await createRazorpayOrder({
@@ -116,12 +119,27 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
     })
     if (insertError) throw new Error(`Could not record the order: ${insertError.message}`)
 
+    if (total <= 0) {
+      const fulfilled = await fulfillOrder(orderId, `free_${orderId}`)
+      res.status(200).json({
+        orderId,
+        amount: total,
+        currency,
+        keyId: razorpayKeyId(),
+        mock: false,
+        free: true,
+        licenseKey: fulfilled.licenseKey
+      })
+      return
+    }
+
     res.status(200).json({
       orderId,
       amount: total,
       currency,
       keyId: razorpayKeyId(),
-      mock: isMockPayments()
+      mock: isMockPayments(),
+      free: false
     })
   } catch (error) {
     const statusCode = error instanceof HttpError ? error.statusCode : 500

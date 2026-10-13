@@ -93,6 +93,10 @@ export function Checkout(): ReactNode {
         extraSeats,
         mode: seatAddonMode ? 'seat_addon' : 'plan'
       })
+      if (order.free) {
+        window.location.hash = '/account?paid=1'
+        return
+      }
       if (order.mock) {
         await verifyPayment(order.orderId, `pay_mock_${Date.now()}`, 'mock_signature')
         window.location.hash = '/account?paid=1'
@@ -293,7 +297,13 @@ export function Checkout(): ReactNode {
           disabled={busy}
           className="mt-6 w-full cursor-pointer rounded-lg bg-gold px-4 py-3 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
         >
-          {busy ? 'Opening payment…' : `Pay ${formatMoney(total, currency)}`}
+          {busy
+            ? total === 0
+              ? 'Activating…'
+              : 'Opening payment…'
+            : total === 0
+              ? 'Activate free'
+              : `Pay ${formatMoney(total, currency)}`}
         </button>
 
         <p className="mt-3 text-center text-xs text-muted">Payments are processed securely by Razorpay.</p>

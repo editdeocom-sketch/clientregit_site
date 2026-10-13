@@ -61,10 +61,14 @@ async function main(): Promise<void> {
   const tokenA = signin.data.session!.access_token
 
   console.log('--- 2. Purchase (mock mode): create-order ---')
+  const { data: lifetimePlan } = await admin.from('plans').select('price_inr, price_per_seat_inr, seats').eq('id', 'lifetime').single()
+  const planSeats = Number(lifetimePlan?.seats ?? 1) > 1 ? Number(lifetimePlan?.seats) : 1
+  const expectedSubtotal = Number(lifetimePlan?.price_inr ?? 0) + Math.max(0, planSeats - 1) * Number(lifetimePlan?.price_per_seat_inr ?? 0)
+  const expectedTotal = Math.round(expectedSubtotal * 1.18)
   const order = await post('/api/create-order', { planId: 'lifetime', currency: 'INR' }, tokenA)
   check('create-order 200', order.status === 200, JSON.stringify(order.json).slice(0, 160))
   check('mock order id', typeof order.json.orderId === 'string' && order.json.orderId.startsWith('order_mock_'), order.json.orderId)
-  check('amount incl 18% GST = 471882 paise', order.json.amount === 471882, `got ${order.json.amount}`)
+  check(`amount incl 18% GST = ${expectedTotal} paise`, order.json.amount === expectedTotal, `got ${order.json.amount}`)
   check('mock flag true', order.json.mock === true)
 
   console.log('--- 3. verify-payment fulfills license ---')
@@ -83,6 +87,29 @@ async function main(): Promise<void> {
     signature: 'mock_sig'
   }, tokenA)
   check('idempotent re-verify returns same key', verify2.json.licenseKey === key, verify2.json.licenseKey)
+
+  console.log('--- 3b. 100% coupon → free order, no payment gateway ---')
+  const freeCode = `E2EFREE${stamp}`
+  const couponInsert = await admin.from('coupons').insert({
+    code: freeCode,
+    type: 'percent',
+    value: 100,
+    plan_id: null,
+    max_uses: null,
+    used_count: 0,
+    active: true,
+    expires_at: null
+  })
+  check('admin creates 100% coupon', !couponInsert.error, couponInsert.error?.message ?? freeCode)
+  const freeOrder = await post('/api/create-order', { planId: 'lifetime', currency: 'INR', couponCode: freeCode }, tokenA)
+  check('free create-order 200', freeOrder.status === 200, JSON.stringify(freeOrder.json).slice(0, 160))
+  check('free flag true', freeOrder.json.free === true, String(freeOrder.json.free))
+  check('amount 0 paise', freeOrder.json.amount === 0, String(freeOrder.json.amount))
+  check('order_free_ id (no Razorpay call)', typeof freeOrder.json.orderId === 'string' && freeOrder.json.orderId.startsWith('order_free_'), freeOrder.json.orderId)
+  check('licenseKey issued immediately', /^CRIT-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}$/.test(freeOrder.json.licenseKey ?? ''), freeOrder.json.licenseKey ?? 'missing')
+  const freeRow = await anon.from('orders').select('status, total').eq('razorpay_order_id', freeOrder.json.orderId).maybeSingle()
+  check('free order recorded as paid ₹0', freeRow.data?.status === 'paid' && freeRow.data?.total === 0, JSON.stringify(freeRow.data))
+  await admin.from('coupons').delete().eq('code', freeCode)
 
   console.log('--- 4. RLS: license visible to owner only ---')
   const ownRead = await anon.from('licenses').select('license_key, type').eq('license_key', key!)

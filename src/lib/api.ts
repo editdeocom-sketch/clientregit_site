@@ -25,6 +25,8 @@ export interface CreateOrderResult {
   currency: CurrencyCode
   keyId: string
   mock: boolean
+  free?: boolean
+  licenseKey?: string
 }
 
 export function createOrder(
