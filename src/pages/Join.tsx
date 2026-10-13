@@ -16,6 +16,7 @@ import {
 } from '@/components/JoinIcons'
 import { CallEngine, type CallPeerState, type CallSelfState } from '@/lib/call'
 import { supabase } from '@/lib/supabase'
+import { DOWNLOADS } from '@shared/site'
 
 interface MeetingInfo {
   ok: boolean
@@ -686,6 +687,19 @@ export function Join(): ReactNode {
 
           <div className="space-y-4">
             <h1 className="text-lg font-semibold">Join as a guest</h1>
+            <p className="-mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
+              <span>Have the ClientRegit app?</span>
+              <a
+                href={`clientregit://join/${code}`}
+                className="font-semibold text-gold-strong hover:underline"
+              >
+                Open in the desktop app
+              </a>
+              <span aria-hidden="true">·</span>
+              <a href={DOWNLOADS.release} target="_blank" rel="noreferrer" className="hover:underline">
+                Download
+              </a>
+            </p>
             <div>
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted">
                 Your name <span className="text-danger">*</span>
