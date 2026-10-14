@@ -1,6 +1,7 @@
 import { lazy, type ReactNode } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { CurrencyProvider } from '@/lib/currency'
+import { useSeo } from '@/lib/seo'
 import { SiteLayout } from '@/components/SiteLayout'
 import { Landing } from '@/pages/Landing'
 
@@ -15,6 +16,7 @@ const Refunds = lazy(() => import('@/pages/legal/Legal').then((m) => ({ default:
 const Join = lazy(() => import('@/pages/Join').then((m) => ({ default: m.Join })))
 
 export function App(): ReactNode {
+  useSeo()
   return (
     <CurrencyProvider>
       <Routes>

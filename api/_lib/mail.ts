@@ -5,7 +5,7 @@ import { formatMoney } from '../../src/shared/plans.js'
 
 type Currency = 'INR' | 'USD'
 
-const ORIGIN = (process.env.SITE_URL || 'https://clientregit.vercel.app').replace(/\/+$/, '')
+const ORIGIN = (process.env.SITE_URL || 'https://clientregit.com').replace(/\/+$/, '')
 
 function escapeHtml(value: string): string {
   return value

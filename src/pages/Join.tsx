@@ -551,7 +551,7 @@ export function Join(): ReactNode {
           Check the meeting code {code ? `“${code}”` : ''} and try again.
         </p>
         <Link to="/" className="text-sm font-medium text-gold-strong hover:underline">
-          Back to clientregit.vercel.app
+          Back to clientregit.com
         </Link>
       </div>
     )
@@ -565,7 +565,7 @@ export function Join(): ReactNode {
         </p>
         <p className="text-xs text-muted">{info.title}</p>
         <Link to="/" className="text-sm font-medium text-gold-strong hover:underline">
-          Back to clientregit.vercel.app
+          Back to clientregit.com
         </Link>
       </div>
     )

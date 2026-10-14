@@ -15,7 +15,7 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
     const email = normalizeEmail(typeof body.email === 'string' ? body.email : '')
     await assertSendAllowed(email)
 
-    const origin = (process.env.SITE_URL || 'https://clientregit.vercel.app').replace(/\/+$/, '')
+    const origin = (process.env.SITE_URL || 'https://clientregit.com').replace(/\/+$/, '')
     let actionLink: string
     try {
       const { data, error } = await supabaseAdmin().auth.admin.generateLink({
