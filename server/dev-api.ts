@@ -17,13 +17,17 @@ if (existsSync(envPath)) {
 const { default: createOrder } = await import('../api/create-order')
 const { default: verifyPayment } = await import('../api/verify-payment')
 const { default: razorpayWebhook } = await import('../api/razorpay-webhook')
+const { default: otpSend } = await import('../api/otp-send')
+const { default: otpVerify } = await import('../api/otp-verify')
 
 type Handler = (req: HandlerRequest, res: HandlerResponse) => Promise<void>
 
 const routes: Record<string, Handler> = {
   '/api/create-order': createOrder,
   '/api/verify-payment': verifyPayment,
-  '/api/razorpay-webhook': razorpayWebhook
+  '/api/razorpay-webhook': razorpayWebhook,
+  '/api/otp-send': otpSend,
+  '/api/otp-verify': otpVerify
 }
 
 const server = http.createServer((req, res) => {

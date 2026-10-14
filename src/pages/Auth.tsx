@@ -9,6 +9,16 @@ type Mode = 'signin' | 'signup' | 'forgot'
 const PASSWORD_RULE = 'At least 8 characters with uppercase, lowercase, number & symbol'
 const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/
 
+async function postJson(path: string, payload: unknown): Promise<void> {
+  const response = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  const json = (await response.json().catch(() => ({}))) as { error?: string }
+  if (!response.ok) throw new Error(json.error ?? 'Request failed — please try again.')
+}
+
 function EyeIcon({ off }: { off: boolean }): ReactNode {
   return off ? (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -80,8 +90,7 @@ export function Auth(): ReactNode {
           }
         })
         if (error) throw error
-        const otpSend = await supabase().auth.signInWithOtp({ email: email.trim() })
-        if (otpSend.error) throw otpSend.error
+        await postJson('/api/otp-send', { email: email.trim() })
         setOtpStage(true)
         setOtpCode('')
         setOtpMessage({ kind: 'info', text: 'Enter the 6-digit code we just emailed you.' })
@@ -120,12 +129,12 @@ export function Auth(): ReactNode {
     setOtpBusy(true)
     setOtpMessage(null)
     try {
-      const { error } = await supabase().auth.verifyOtp({
-        email: email.trim(),
-        token: otpCode.trim(),
-        type: 'email'
-      })
-      if (error) throw error
+      await postJson('/api/otp-verify', { email: email.trim(), code: otpCode.trim() })
+      const { data } = await supabase().auth.getSession()
+      if (!data.session) {
+        const { error } = await supabase().auth.signInWithPassword({ email: email.trim(), password })
+        if (error) throw error
+      }
       navigate(next, { replace: true })
     } catch (err) {
       setOtpMessage({ kind: 'error', text: err instanceof Error ? err.message : String(err) })
@@ -139,8 +148,7 @@ export function Auth(): ReactNode {
     setOtpBusy(true)
     setOtpMessage(null)
     try {
-      const { error } = await supabase().auth.signInWithOtp({ email: email.trim() })
-      if (error) throw error
+      await postJson('/api/otp-send', { email: email.trim() })
       setOtpMessage({ kind: 'info', text: 'New code sent — check your inbox.' })
       setResendCooldown(30)
       const timer = setInterval(() => {
