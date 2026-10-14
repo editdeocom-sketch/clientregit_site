@@ -31,7 +31,7 @@ export function Privacy(): ReactNode {
         activation and update checks.
       </p>
       <p>
-        <strong>Your rights:</strong> email {`support@clientregit.com`} to request deletion of your website account and
+        <strong>Your rights:</strong> email {`support.clientregit@gmail.com`} to request deletion of your website account and
         associated license records. App data on your PC is yours to delete at any time.
       </p>
     </LegalShell>
@@ -64,7 +64,7 @@ export function Terms(): ReactNode {
         to the amount you paid for the license in the last 12 months. The app is provided "as is".
       </p>
       <p>
-        <strong>Governing law:</strong> these terms are governed by the laws of India. Questions: support@clientregit.com
+        <strong>Governing law:</strong> these terms are governed by the laws of India. Questions: support.clientregit@gmail.com
       </p>
     </LegalShell>
   )
@@ -78,7 +78,7 @@ export function Refunds(): ReactNode {
         hoops.
       </p>
       <p>
-        <strong>Window:</strong> email support@clientregit.com within <strong>14 days of purchase</strong> and we will
+        <strong>Window:</strong> email support.clientregit@gmail.com within <strong>14 days of purchase</strong> and we will
         refund the full amount (including GST) to the original payment method.
       </p>
       <p>

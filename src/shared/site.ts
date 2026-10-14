@@ -1,7 +1,7 @@
 export const SITE = {
   name: 'ClientRegit',
   tagline: 'Client management for video editors',
-  supportEmail: 'support@clientregit.com',
+  supportEmail: 'support.clientregit@gmail.com',
   address: 'ClientRegit, India'
 } as const
 

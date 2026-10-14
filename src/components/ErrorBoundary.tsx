@@ -35,7 +35,7 @@ export class ErrorBoundary extends Component<Props, State> {
               Reload page
             </button>
             <a
-              href="mailto:support@clientregit.com"
+              href="mailto:support.clientregit@gmail.com"
               className="rounded-lg border border-line bg-surface px-5 py-2.5 text-sm font-semibold hover:border-gold hover:text-gold-strong"
             >
               Email support
