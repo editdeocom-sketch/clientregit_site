@@ -19,6 +19,7 @@ const { default: verifyPayment } = await import('../api/verify-payment')
 const { default: razorpayWebhook } = await import('../api/razorpay-webhook')
 const { default: otpSend } = await import('../api/otp-send')
 const { default: otpVerify } = await import('../api/otp-verify')
+const { default: resetSend } = await import('../api/reset-send')
 
 type Handler = (req: HandlerRequest, res: HandlerResponse) => Promise<void>
 
@@ -27,7 +28,8 @@ const routes: Record<string, Handler> = {
   '/api/verify-payment': verifyPayment,
   '/api/razorpay-webhook': razorpayWebhook,
   '/api/otp-send': otpSend,
-  '/api/otp-verify': otpVerify
+  '/api/otp-verify': otpVerify,
+  '/api/reset-send': resetSend
 }
 
 const server = http.createServer((req, res) => {

@@ -1,7 +1,8 @@
 import crypto from 'node:crypto'
-import nodemailer from 'nodemailer'
 import { HttpError } from './http.js'
 import { supabaseAdmin } from './supabase.js'
+
+export { sendOtpEmail } from './mail.js'
 
 const CODE_TTL_MINUTES = 10
 const MIN_RESEND_SECONDS = 60
@@ -53,55 +54,6 @@ export async function storeCode(email: string, code: string): Promise<void> {
 
 export async function discardUnconsumedCodes(email: string): Promise<void> {
   await supabaseAdmin().from('email_otps').delete().eq('email', email).is('consumed_at', null)
-}
-
-function emailHtml(code: string): string {
-  return `<!doctype html>
-<html>
-  <body style="margin:0;background:#f4f3ef;font-family:Arial,Helvetica,sans-serif;">
-    <div style="max-width:460px;margin:32px auto;background:#ffffff;border-radius:16px;border:1px solid #e7e5de;overflow:hidden;">
-      <div style="background:#14161c;padding:22px 32px;">
-        <span style="color:#d4af37;font-size:18px;font-weight:bold;letter-spacing:0.5px;">ClientRegit</span>
-      </div>
-      <div style="padding:32px;">
-        <h1 style="margin:0 0 6px;font-size:20px;color:#14161c;">Verify your email</h1>
-        <p style="margin:0;color:#6b7280;font-size:14px;">Enter this code to finish creating your account:</p>
-        <div style="margin:26px 0;text-align:center;">
-          <span style="display:inline-block;font-family:monospace;font-size:34px;letter-spacing:10px;font-weight:bold;color:#14161c;background:#faf9f5;border:1px dashed #d4af37;border-radius:12px;padding:16px 10px 16px 20px;">${code}</span>
-        </div>
-        <p style="margin:0;color:#9ca3af;font-size:12px;">This code expires in ${CODE_TTL_MINUTES} minutes. If you didn&rsquo;t request it, you can safely ignore this email.</p>
-      </div>
-    </div>
-  </body>
-</html>`
-}
-
-export async function sendOtpEmail(email: string, code: string): Promise<void> {
-  const host = process.env.SMTP_HOST
-  const user = process.env.SMTP_USER
-  const pass = process.env.SMTP_PASS
-  if (!host || !user || !pass) {
-    throw new HttpError(500, 'Email service is not configured yet — set SMTP_HOST, SMTP_USER and SMTP_PASS.')
-  }
-  const port = Number(process.env.SMTP_PORT ?? 465)
-  const transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: { user, pass }
-  })
-  try {
-    await transporter.sendMail({
-      from: `"ClientRegit" <${process.env.SMTP_FROM || user}>`,
-      to: email,
-      subject: `${code} is your ClientRegit verification code`,
-      text: `Your verification code is ${code}. It expires in ${CODE_TTL_MINUTES} minutes. If you didn't sign up for ClientRegit, ignore this email.`,
-      html: emailHtml(code)
-    })
-  } catch (error) {
-    console.error('[otp] send failed:', error instanceof Error ? error.message : error)
-    throw new HttpError(502, 'Could not send the email — check the SMTP settings.')
-  }
 }
 
 export async function verifyCode(email: string, code: string): Promise<void> {

@@ -12,3 +12,4 @@ dev.err
 
 *.log
 *.err
+vercel-otp.env

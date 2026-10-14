@@ -65,11 +65,11 @@ export function Auth(): ReactNode {
     setMessage(null)
     try {
       if (mode === 'forgot') {
-        const { error } = await supabase().auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`
+        await postJson('/api/reset-send', { email: email.trim() })
+        setMessage({
+          kind: 'info',
+          text: 'If an account exists for that email, we sent a password reset link.'
         })
-        if (error) throw error
-        setMessage({ kind: 'info', text: 'Check your inbox — we sent a password reset link.' })
         return
       }
       if (mode === 'signup') {

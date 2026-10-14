@@ -2,6 +2,7 @@
 import type { LicenseType } from '../../src/shared/plans.js'
 import { supabaseAdmin } from './supabase.js'
 import { fetchPlans, planSeats } from './plans.js'
+import { sendPurchaseEmail } from './mail.js'
 
 function generateKey(): string {
   const hex = crypto.randomBytes(8).toString('hex').toUpperCase()
@@ -28,12 +29,17 @@ export async function fulfillOrder(razorpayOrderId: string, paymentId: string): 
 
   const { data: order, error: orderError } = await db
     .from('orders')
-    .select('id, user_id, plan_id, status, extra_seats, kind')
+    .select(
+      'id, user_id, plan_id, status, extra_seats, kind, razorpay_order_id, currency, subtotal, tax_percent, tax_amount, discount_amount, coupon_code, total'
+    )
     .eq('razorpay_order_id', razorpayOrderId)
     .maybeSingle()
   if (orderError) throw new Error(`Order lookup failed: ${orderError.message}`)
   if (!order) throw new Error('Order not found.')
 
+  let transitioned = false
+  let purchasedPlanName: string | null = null
+  let purchasedSeats = 0
   if (order.status !== 'paid') {
     const { data: updated, error: updateError } = await db
       .from('orders')
@@ -43,8 +49,10 @@ export async function fulfillOrder(razorpayOrderId: string, paymentId: string): 
       .select('id')
     if (updateError) throw new Error(`Order update failed: ${updateError.message}`)
     if ((updated ?? []).length > 0) {
+      transitioned = true
       const plan = (await fetchPlans()).find((p) => p.id === order.plan_id)
       if (!plan) throw new Error(`Unknown plan: ${order.plan_id}`)
+      purchasedPlanName = plan.name
       const extraSeats = order.extra_seats ?? 0
 
       if (order.kind === 'seat_addon') {
@@ -71,6 +79,7 @@ export async function fulfillOrder(razorpayOrderId: string, paymentId: string): 
       } else {
         const type: LicenseType = plan.license_type
         const seats = planSeats(plan) + extraSeats
+        purchasedSeats = seats
         const { error: insertError } = await db.from('licenses').insert({
           user_id: order.user_id,
           license_key: generateKey(),
@@ -89,6 +98,7 @@ export async function fulfillOrder(razorpayOrderId: string, paymentId: string): 
     }
   }
 
+  let licenseKey: string
   if (order.extra_seats && order.extra_seats > 0 && order.kind === 'seat_addon') {
     const { data: license, error: licenseError } = await db
       .from('licenses')
@@ -101,15 +111,50 @@ export async function fulfillOrder(razorpayOrderId: string, paymentId: string): 
       .maybeSingle()
     if (licenseError) throw new Error(`License lookup failed: ${licenseError.message}`)
     if (!license) throw new Error('License was not found. Contact support with your payment id.')
-    return { licenseKey: license.license_key as string }
+    licenseKey = license.license_key as string
+  } else {
+    const { data: license, error: licenseError } = await db
+      .from('licenses')
+      .select('license_key')
+      .eq('order_id', order.id)
+      .maybeSingle()
+    if (licenseError) throw new Error(`License lookup failed: ${licenseError.message}`)
+    if (!license) throw new Error('License was not created. Contact support with your payment id.')
+    licenseKey = license.license_key as string
   }
 
-  const { data: license, error: licenseError } = await db
-    .from('licenses')
-    .select('license_key')
-    .eq('order_id', order.id)
-    .maybeSingle()
-  if (licenseError) throw new Error(`License lookup failed: ${licenseError.message}`)
-  if (!license) throw new Error('License was not created. Contact support with your payment id.')
-  return { licenseKey: license.license_key as string }
+  if (transitioned && purchasedPlanName) {
+    try {
+      const { data: profile } = await db
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', order.user_id)
+        .maybeSingle()
+      if (profile?.email) {
+        await sendPurchaseEmail({
+          to: profile.email,
+          name: profile.full_name ?? '',
+          kind: order.kind === 'seat_addon' ? 'seat_addon' : 'plan',
+          planName: purchasedPlanName,
+          seats: purchasedSeats,
+          extraSeats: order.extra_seats ?? 0,
+          orderId: order.razorpay_order_id,
+          paymentId,
+          paidAt: new Date().toISOString(),
+          subtotal: order.subtotal ?? 0,
+          taxPercent: order.tax_percent ?? 0,
+          taxAmount: order.tax_amount ?? 0,
+          discount: order.discount_amount ?? 0,
+          coupon: order.coupon_code ?? null,
+          total: order.total ?? 0,
+          currency: (order.currency === 'USD' ? 'USD' : 'INR'),
+          licenseKey
+        })
+      }
+    } catch (error) {
+      console.error('[fulfill] purchase email failed:', error instanceof Error ? error.message : error)
+    }
+  }
+
+  return { licenseKey }
 }
