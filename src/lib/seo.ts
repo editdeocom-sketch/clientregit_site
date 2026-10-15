@@ -21,8 +21,7 @@ const ROUTES: Array<{ match: RegExp; seo: RouteSeo }> = [
   { match: /^\/reset-password$/, seo: { title: 'Reset Your Password — ClientRegit' } },
   { match: /^\/checkout\//, seo: { title: 'Checkout — ClientRegit' } },
   { match: /^\/account/, seo: { title: 'My Account — ClientRegit' } },
-  { match: /^\/admin/, seo: { title: 'Admin — ClientRegit' } },
-  { match: /^\/join\//, seo: { title: 'Meeting — ClientRegit' } }
+  { match: /^\/admin/, seo: { title: 'Admin — ClientRegit' } }
 ]
 
 function setMeta(attr: 'name' | 'property', key: string, content: string): void {

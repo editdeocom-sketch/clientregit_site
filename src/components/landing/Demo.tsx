@@ -10,7 +10,7 @@ export function Demo(): ReactNode {
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Screens from the app</h2>
           <p className="mx-auto mt-3 max-w-xl text-muted">
-            Real captures of ClientRegit in use — dashboard, meetings and notifications, exactly as the
+            Real captures of ClientRegit in use — dashboard and notifications, exactly as the
             desktop app looks on your machine.
           </p>
         </div>
@@ -24,7 +24,6 @@ export function Demo(): ReactNode {
               />
             </div>
             <div className="grid gap-5 md:col-span-2">
-              <ShotFrame src="/shots/meetings.png" alt="ClientRegit meetings list with join code and live badge" label="Meetings" />
               <ShotFrame src="/shots/notifications.png" alt="ClientRegit notification settings" label="Notifications" />
             </div>
           </div>

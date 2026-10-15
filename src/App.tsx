@@ -13,14 +13,12 @@ const Admin = lazy(() => import('@/pages/Admin').then((m) => ({ default: m.Admin
 const Privacy = lazy(() => import('@/pages/legal/Legal').then((m) => ({ default: m.Privacy })))
 const Terms = lazy(() => import('@/pages/legal/Legal').then((m) => ({ default: m.Terms })))
 const Refunds = lazy(() => import('@/pages/legal/Legal').then((m) => ({ default: m.Refunds })))
-const Join = lazy(() => import('@/pages/Join').then((m) => ({ default: m.Join })))
 
 export function App(): ReactNode {
   useSeo()
   return (
     <CurrencyProvider>
       <Routes>
-        <Route path="/join/:code" element={<Join />} />
         <Route element={<SiteLayout />}>
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />

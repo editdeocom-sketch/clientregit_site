@@ -6,9 +6,9 @@ const ROWS: Array<{
   title: string
   body: string
   bullets: string[]
-  src: string
-  alt: string
-  label: string
+  src?: string
+  alt?: string
+  label?: string
 }> = [
   {
     title: 'Client management',
@@ -51,29 +51,26 @@ const ROWS: Array<{
     label: 'Reports'
   },
   {
-    title: 'Video meetings',
-    body: 'Meet clients right inside ClientRegit — schedule a call, share the link, and jump in. No extra apps, no accounts for guests.',
+    title: 'Google Meet integration',
+    body: 'Link your Google account once and run client meetings on Google Meet — create a meeting in one click and copy the link for your client.',
     bullets: [
-      'Up to 6 people per call with screen sharing',
-      'In-call chat, reactions and local .webm recording',
-      'Waiting room, shareable link and 10-char join code',
-      'Guests join from any browser — nothing to install'
-    ],
-    src: '/shots/meeting-room.png',
-    alt: 'ClientRegit meeting room with screen share, participants and call controls',
-    label: 'Meeting'
+      'One-click meetings using your own Google account',
+      'Upcoming meetings list with join links',
+      'Works with the Google Calendar you already use',
+      'Tokens stored encrypted on your PC — data goes to Google, not us'
+    ]
   },
   {
     title: 'Desktop notifications & tray',
     body: 'Close the window and ClientRegit keeps running in the tray — the alerts you care about keep arriving.',
     bullets: [
-      'Meeting invites, reminders and live alerts',
-      'Direct messages, task assignments and team events',
+      'Task deadlines, assignments and reminders',
+      'Team activity and roster alerts',
       'Per-category toggles — pick what deserves your attention',
       'Quitting is a choice, not an accident'
     ],
     src: '/shots/notifications.png',
-    alt: 'ClientRegit notification settings with toggles for meetings, messages, tasks and team events',
+    alt: 'ClientRegit notification settings with per-category toggles',
     label: 'Notifications'
   }
 ]
@@ -85,13 +82,15 @@ function FeatureRow({ row, flipped }: { row: (typeof ROWS)[number]; flipped: boo
       ref={r.ref}
       className={`flex flex-col items-center gap-10 md:flex-row md:gap-14 ${flipped ? 'md:flex-row-reverse' : ''} ${r.className}`}
     >
-      <div className="w-full md:w-1/2">
-        <ShotFrame src={row.src} alt={row.alt} label={row.label} />
-      </div>
-      <div className="w-full md:w-1/2">
+      {row.src && (
+        <div className="w-full md:w-1/2">
+          <ShotFrame src={row.src} alt={row.alt ?? row.title} label={row.label ?? row.title} />
+        </div>
+      )}
+      <div className={row.src ? 'w-full md:w-1/2' : 'w-full max-w-2xl text-center'}>
         <h3 className="text-2xl font-bold tracking-tight">{row.title}</h3>
         <p className="mt-3 leading-relaxed text-muted">{row.body}</p>
-        <ul className="mt-5 space-y-2.5 text-sm">
+        <ul className={`mt-5 space-y-2.5 text-sm ${row.src ? '' : 'inline-block text-left'}`}>
           {row.bullets.map((b) => (
             <li key={b} className="flex gap-2.5">
               <span className="mt-0.5 font-bold text-gold" aria-hidden>
@@ -113,7 +112,7 @@ export function Features(): ReactNode {
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Everything a creative business needs</h2>
           <p className="mx-auto mt-3 max-w-2xl text-muted">
-            Real screens from the app — no mockups, no vaporware. Every feature below ships in version 1.2.0.
+            Real screens from the app — no mockups, no vaporware. Every feature below ships in version 1.3.0.
           </p>
         </div>
         {ROWS.map((row, i) => (
@@ -131,8 +130,9 @@ function DataLocalCard(): ReactNode {
     <div ref={r.ref} className={`rounded-2xl border border-line bg-surface p-8 text-center ${r.className}`}>
       <h3 className="text-xl font-bold">Your data stays yours</h3>
       <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-        ClientRegit stores everything in a local database on your computer. Nothing is uploaded to our servers.
-        Export a JSON backup or CSV anytime, and keep the files however you like.
+        ClientRegit stores your business data — clients, projects, invoices — in a local database on your computer.
+        Only license checks, team workspace sync (if you use teams) and the optional Google account link ever go
+        online. Export a JSON backup or CSV anytime, and keep the files however you like.
       </p>
     </div>
   )

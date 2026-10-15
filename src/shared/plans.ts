@@ -43,7 +43,7 @@ export const FALLBACK_PLANS: SitePlan[] = [
   {
     id: 'yearly',
     name: 'Yearly',
-    blurb: 'Full access for a year — two months free vs monthly.',
+    blurb: 'Full access for a year — one payment instead of twelve.',
     licenseType: 'subscription',
     months: 12,
     prices: { INR: 159900, USD: 1400 },

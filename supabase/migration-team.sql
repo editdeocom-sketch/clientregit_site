@@ -222,7 +222,7 @@ insert into public.plans (
   ),
   (
     'yearly', 'Yearly',
-    'Full access for a year — two months free vs monthly.',
+    'Full access for a year — one payment instead of twelve.',
     'subscription', 12,
     159900, 1400, true, 2, true,
     1, 0, 0, 239900, 1900

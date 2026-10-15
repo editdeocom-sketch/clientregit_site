@@ -37,11 +37,11 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: 'Where is my data stored?',
-    a: 'In a local database on your own computer. ClientRegit is a desktop app — your client and project data is never uploaded to our servers. You can export a JSON backup or CSV at any time.'
+    a: 'In a local database on your own computer. ClientRegit is a desktop app — your client, project and invoice data is never uploaded to our servers. Only team workspace data (if you use one) and the optional Google account link go online. You can export a JSON backup or CSV at any time.'
   },
   {
     q: 'Does it work offline?',
-    a: 'Yes. The app itself runs fully offline. Internet is only needed for sign-in, license activation, purchase and app updates.'
+    a: 'Yes. The app itself runs fully offline. Internet is only needed for sign-in, license activation, purchase, app updates, team workspaces and Google Meet linking.'
   },
   {
     q: 'How do revisions work?',

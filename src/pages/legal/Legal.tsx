@@ -12,23 +12,32 @@ function LegalShell({ title, updated, children }: { title: string; updated: stri
 
 export function Privacy(): ReactNode {
   return (
-    <LegalShell title="Privacy Policy" updated="9 October 2026">
+    <LegalShell title="Privacy Policy" updated="15 October 2026">
       <p>
         ClientRegit is a desktop application. Your clients, projects, tasks, invoices and all other business data are
-        stored in a local database <strong>on your own computer</strong>. We do not receive, host or sync that data.
+        stored in a local database <strong>on your own computer</strong>. We do not receive, host or store that data.
       </p>
       <p>
         <strong>What we do receive:</strong> when you create an account and purchase a license on this website, we
         store your email address, your plan, payment status and license keys (handled by our payment provider,
-        Razorpay). Our server stores only what is needed to verify licenses and send purchase receipts.
+        Razorpay). Our server also handles license activation, seat verification and app update checks.
+      </p>
+      <p>
+        <strong>Team workspaces:</strong> if you join a team, the shared collaboration data your team creates there
+        (members, shared tasks and activity) is synced to our cloud so teammates can see it. Individual business data
+        outside a team workspace stays on your computer.
+      </p>
+      <p>
+        <strong>Google account linking (optional):</strong> you can link a Google account to create and join Google
+        Meet sessions from the app. The app then communicates with Google directly using OAuth — your Google tokens are
+        stored encrypted on your PC and your Google Calendar/Meet data is sent to Google, not to us.
       </p>
       <p>
         <strong>Cookies &amp; local storage:</strong> this site uses browser storage to keep you signed in and to
         remember your INR/USD preference. We do not run third-party advertising trackers.
       </p>
       <p>
-        <strong>Analytics:</strong> none on this marketing site. The desktop app phones home only for license
-        activation and update checks.
+        <strong>Analytics:</strong> none on this marketing site or in the desktop app.
       </p>
       <p>
         <strong>Your rights:</strong> email {`support.clientregit@gmail.com`} to request deletion of your website account and

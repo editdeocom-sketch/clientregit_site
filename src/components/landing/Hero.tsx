@@ -20,7 +20,7 @@ export function Hero() {
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/80">
             {SITE.name} brings your clients, projects, revisions and invoices into one simple desktop
-            application — now with built-in video meetings.
+            application — now with Google Meet integration.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a

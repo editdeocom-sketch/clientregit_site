@@ -22,7 +22,7 @@ create policy "plans_public_read" on public.plans for select using (true);
 
 insert into public.plans (id, name, blurb, license_type, months, price_inr, price_usd, sort_order, highlight) values
   ('monthly', 'Monthly', 'Full access, cancel anytime. Billed every month.', 'subscription', 1, 15900, 200, 1, false),
-  ('yearly', 'Yearly', 'Full access for a year — two months free vs monthly.', 'subscription', 12, 109900, 1400, 2, true),
+  ('yearly', 'Yearly', 'Full access for a year — one payment instead of twelve.', 'subscription', 12, 109900, 1400, 2, true),
   ('lifetime', 'Lifetime', 'One payment, yours forever. All future updates included.', 'perpetual', null, 399900, 4900, 3, false)
 on conflict (id) do nothing;
 

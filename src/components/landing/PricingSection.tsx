@@ -125,7 +125,8 @@ export function PricingSection(): ReactNode {
           </div>
           {tab === 'team' && (
             <p className="mx-auto mt-3 max-w-xl text-sm text-muted">
-              One license key for the whole crew — activate on up to N computers. Extra members ₹299 / $5 each.
+              One license key for the whole crew — activate on 5, 8 or 10 computers depending on the plan. Extra
+              members ₹299 / $5 each.
             </p>
           )}
         </div>
