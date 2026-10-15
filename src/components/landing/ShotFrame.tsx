@@ -7,6 +7,7 @@ type ShotFrameProps = {
 }
 
 export function ShotFrame({ src, alt, label, className = '', eager = false }: ShotFrameProps) {
+  const srcset = src.endsWith('.webp') ? `${src.replace('.webp', '-892.webp')} 892w, ${src} 1783w` : undefined
   return (
     <div className={`overflow-hidden rounded-xl border border-line bg-surface shadow-2xl ${className}`}>
       <div className="flex items-center gap-1.5 border-b border-line bg-surface-2 px-3 py-2">
@@ -17,6 +18,8 @@ export function ShotFrame({ src, alt, label, className = '', eager = false }: Sh
       </div>
       <img
         src={src}
+        srcSet={srcset}
+        sizes="(max-width: 768px) 100vw, 50vw"
         alt={alt}
         className="block w-full"
         width={1783}

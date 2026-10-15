@@ -326,7 +326,7 @@ function CouponForm({ onDone }: { onDone: () => void }): ReactNode {
       <button
         type="submit"
         disabled={busy}
-        className="mt-4 cursor-pointer rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
+        className="mt-4 cursor-pointer rounded-lg bg-gold-btn px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
       >
         {busy ? 'Creating…' : 'Create coupon'}
       </button>
@@ -726,7 +726,7 @@ function PlanForm({
         <button
           type="submit"
           disabled={busy}
-          className="cursor-pointer rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
+          className="cursor-pointer rounded-lg bg-gold-btn px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
         >
           {busy ? 'Saving…' : editing ? 'Save changes' : 'Create plan'}
         </button>

@@ -4,7 +4,7 @@ import { useReveal } from '@/lib/useReveal'
 
 const POINTS: Array<{ title: string; body: string }> = [
   { title: 'True desktop app', body: 'Windows 10/11 x64 and macOS on Apple Silicon. Opens fast, works offline.' },
-  { title: 'Local storage', body: 'Your database lives on your PC. Only team workspaces (if you use one) sync to the cloud.' },
+  { title: 'Local storage', body: 'Your database lives on your PC. Sign in to sync it to your account across computers.' },
   { title: 'Backups you control', body: 'Export a JSON backup or CSV anytime. Restore on a new machine in minutes.' },
   { title: 'Lifetime or subscription', body: 'Own it forever, or pay monthly or yearly — same features either way.' },
   { title: 'GST invoices', body: '18% GST applied at checkout for Indian customers, with a proper invoice.' },

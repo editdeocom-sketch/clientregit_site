@@ -25,7 +25,7 @@ export function Hero() {
           <div className="mt-8 flex flex-wrap gap-3">
             <a
               href={DOWNLOADS.windows}
-              className="rounded-lg bg-gold px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gold-strong"
+              className="rounded-lg bg-gold-btn px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gold-strong"
             >
               Download for Windows
             </a>
@@ -49,7 +49,7 @@ export function Hero() {
         <div className="relative">
           <div className="absolute -inset-6 rounded-3xl bg-gold/10 blur-2xl" aria-hidden />
           <ShotFrame
-            src="/shots/dashboard.png"
+            src="/shots/dashboard.webp"
             alt="ClientRegit dashboard showing revenue, active projects and upcoming deadlines"
             label="Dashboard"
             className="relative"

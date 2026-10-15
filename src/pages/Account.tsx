@@ -260,7 +260,7 @@ function InvoiceView({
           </button>
           <button
             onClick={() => window.print()}
-            className="cursor-pointer rounded-lg bg-gold px-4 py-2 text-xs font-semibold text-white"
+            className="cursor-pointer rounded-lg bg-gold-btn px-4 py-2 text-xs font-semibold text-white"
           >
             Print / Save PDF
           </button>
@@ -366,7 +366,7 @@ function SettingsPanel({ email, fullName, phone }: { email: string; fullName: st
             <button
               type="submit"
               disabled={profileBusy}
-              className="cursor-pointer rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
+              className="cursor-pointer rounded-lg bg-gold-btn px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
             >
               {profileBusy ? 'Saving…' : 'Save profile'}
             </button>
@@ -414,7 +414,7 @@ function SettingsPanel({ email, fullName, phone }: { email: string; fullName: st
           <button
             type="submit"
             disabled={busy}
-            className="cursor-pointer rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
+            className="cursor-pointer rounded-lg bg-gold-btn px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
           >
             {busy ? 'Updating…' : 'Update password'}
           </button>
@@ -607,7 +607,7 @@ export function Account(): ReactNode {
               <div className="flex flex-wrap gap-2">
                 <a
                   href={DOWNLOADS.windows}
-                  className="rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong"
+                  className="rounded-lg bg-gold-btn px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong"
                 >
                   Download for Windows
                 </a>
@@ -640,7 +640,7 @@ export function Account(): ReactNode {
               <Link
                 to="/"
                 onClick={() => setTimeout(() => document.getElementById('pricing')?.scrollIntoView(), 100)}
-                className="mt-4 inline-block rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong"
+                className="mt-4 inline-block rounded-lg bg-gold-btn px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong"
               >
                 See pricing
               </Link>

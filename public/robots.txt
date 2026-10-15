@@ -6,6 +6,5 @@ Disallow: /reset-password
 Disallow: /account
 Disallow: /admin
 Disallow: /checkout/
-Disallow: /join/
 
 Sitemap: https://clientregit.com/sitemap.xml

@@ -18,14 +18,19 @@ export function Privacy(): ReactNode {
         stored in a local database <strong>on your own computer</strong>. We do not receive, host or store that data.
       </p>
       <p>
+        <strong>Account sync (optional):</strong> when you sign in with your ClientRegit account, your business data
+        (clients, projects, tasks and invoices) is synced to our cloud tied to your account, so signing in on another
+        computer restores it automatically. You can keep using the app without signing in — in that case your data
+        never leaves your computer.
+      </p>
+      <p>
         <strong>What we do receive:</strong> when you create an account and purchase a license on this website, we
         store your email address, your plan, payment status and license keys (handled by our payment provider,
         Razorpay). Our server also handles license activation, seat verification and app update checks.
       </p>
       <p>
         <strong>Team workspaces:</strong> if you join a team, the shared collaboration data your team creates there
-        (members, shared tasks and activity) is synced to our cloud so teammates can see it. Individual business data
-        outside a team workspace stays on your computer.
+        (members, shared tasks and activity) is synced to our cloud so teammates can see it.
       </p>
       <p>
         <strong>Google account linking (optional):</strong> you can link a Google account to create and join Google

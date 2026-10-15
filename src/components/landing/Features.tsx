@@ -14,7 +14,7 @@ const ROWS: Array<{
     title: 'Client management',
     body: 'Every client with the details you actually use — no more digging through chat threads.',
     bullets: ['Contacts, emails and phone numbers', 'Notes and tags per client', 'Archive instead of delete', 'Lifetime invoiced total at a glance'],
-    src: '/shots/clients.png',
+    src: '/shots/clients.webp',
     alt: 'ClientRegit client list with search, tags and lifetime totals',
     label: 'Clients'
   },
@@ -22,7 +22,7 @@ const ROWS: Array<{
     title: 'Projects, tasks & files',
     body: 'A clear pipeline from enquiry to delivery, with the tasks and file paths that live next to each job.',
     bullets: ['Statuses: enquiry, in progress, review, revision, delivered, cancelled', 'Priority, deadline and quoted amount on every project', 'To-do lists per project', 'Links to your project folders on disk'],
-    src: '/shots/project.png',
+    src: '/shots/project.webp',
     alt: 'ClientRegit project view with status, tasks and linked project files',
     label: 'Project'
   },
@@ -30,7 +30,7 @@ const ROWS: Array<{
     title: 'Invoices & payments',
     body: 'Build a clean invoice from your business details in seconds — GST-ready for Indian customers.',
     bullets: ['Line items, quantities and rates', 'Tax percentage and discounts calculated for you', 'Payment ledger per invoice', 'Print or save as PDF'],
-    src: '/shots/invoice.png',
+    src: '/shots/invoice.webp',
     alt: 'ClientRegit invoice editor with line items, 18% GST and payment recording',
     label: 'Invoice'
   },
@@ -38,7 +38,7 @@ const ROWS: Array<{
     title: 'Calendar',
     body: 'Project deadlines on one calendar — see the crunch weeks before they hit.',
     bullets: ['Deadlines from every project', 'Colour-coded by status', 'Jump straight to the project'],
-    src: '/shots/calendar.png',
+    src: '/shots/calendar.webp',
     alt: 'ClientRegit calendar showing project deadlines for the month',
     label: 'Calendar'
   },
@@ -46,7 +46,7 @@ const ROWS: Array<{
     title: 'Reports',
     body: 'Monthly revenue and project stats so you know if the business is actually growing.',
     bullets: ['Revenue by month', 'Project counts by status', 'No spreadsheet exports needed'],
-    src: '/shots/reports.png',
+    src: '/shots/reports.webp',
     alt: 'ClientRegit reports page with monthly revenue charts and project stats',
     label: 'Reports'
   },
@@ -69,7 +69,7 @@ const ROWS: Array<{
       'Per-category toggles — pick what deserves your attention',
       'Quitting is a choice, not an accident'
     ],
-    src: '/shots/notifications.png',
+    src: '/shots/notifications.webp',
     alt: 'ClientRegit notification settings with per-category toggles',
     label: 'Notifications'
   }
@@ -131,8 +131,8 @@ function DataLocalCard(): ReactNode {
       <h3 className="text-xl font-bold">Your data stays yours</h3>
       <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-muted">
         ClientRegit stores your business data — clients, projects, invoices — in a local database on your computer.
-        Only license checks, team workspace sync (if you use teams) and the optional Google account link ever go
-        online. Export a JSON backup or CSV anytime, and keep the files however you like.
+        Sign in with your account to sync it across your computers; team workspaces (if you use one) and the optional
+        Google account link also go online. Export a JSON backup or CSV anytime, and keep the files however you like.
       </p>
     </div>
   )

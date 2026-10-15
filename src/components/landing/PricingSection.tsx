@@ -28,7 +28,7 @@ function PlanCard({ plan, currency }: { plan: SitePlan; currency: 'INR' | 'USD' 
       }`}
     >
       {plan.highlight && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gold px-3 py-1 text-xs font-semibold text-white">
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gold-btn px-3 py-1 text-xs font-semibold text-white">
           Most popular
         </span>
       )}
@@ -69,7 +69,7 @@ function PlanCard({ plan, currency }: { plan: SitePlan; currency: 'INR' | 'USD' 
         to={`/checkout/${plan.id}`}
         className={`mt-6 block rounded-lg px-4 py-2.5 text-center text-sm font-semibold ${
           plan.highlight
-            ? 'bg-gold text-white hover:bg-gold-strong'
+            ? 'bg-gold-btn text-white hover:bg-gold-strong'
             : 'border border-line bg-surface hover:border-gold hover:text-gold-strong'
         }`}
       >

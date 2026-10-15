@@ -188,7 +188,7 @@ export function TeamTab({ userId, userEmail, teamLicenses }: TeamTabProps): Reac
   const input =
     'mt-1 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm focus:border-gold focus:outline-none'
   const btnPrimary =
-    'cursor-pointer rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50'
+    'cursor-pointer rounded-lg bg-gold-btn px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50'
   const btnGhost =
     'cursor-pointer rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-semibold hover:border-gold hover:text-gold-strong disabled:opacity-50'
 
@@ -232,7 +232,7 @@ export function TeamTab({ userId, userEmail, teamLicenses }: TeamTabProps): Reac
           <Link
             to="/"
             onClick={() => setTimeout(() => document.getElementById('pricing')?.scrollIntoView(), 100)}
-            className="mt-4 inline-block rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong"
+            className="mt-4 inline-block rounded-lg bg-gold-btn px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong"
           >
             See Team plans
           </Link>
@@ -473,7 +473,7 @@ function InviteCard({
       <button
         onClick={onAccept}
         disabled={busy}
-        className="mt-4 cursor-pointer rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
+        className="mt-4 cursor-pointer rounded-lg bg-gold-btn px-4 py-2 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
       >
         {busy ? 'Joining…' : 'Join team'}
       </button>

@@ -14,9 +14,31 @@ interface RouteSeo {
 
 const ROUTES: Array<{ match: RegExp; seo: RouteSeo }> = [
   { match: /^\/$/, seo: { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION, index: true } },
-  { match: /^\/privacy$/, seo: { title: 'Privacy Policy — ClientRegit', index: true } },
-  { match: /^\/terms$/, seo: { title: 'Terms & Conditions — ClientRegit', index: true } },
-  { match: /^\/refunds$/, seo: { title: 'Refund Policy — ClientRegit', index: true } },
+  {
+    match: /^\/privacy$/,
+    seo: {
+      title: 'Privacy Policy — ClientRegit',
+      description:
+        'How ClientRegit handles your data: local storage on your PC, optional account sync, team workspaces and Google account linking.',
+      index: true
+    }
+  },
+  {
+    match: /^\/terms$/,
+    seo: {
+      title: 'Terms & Conditions — ClientRegit',
+      description: 'The terms of using ClientRegit, including licensing, subscriptions and acceptable use.',
+      index: true
+    }
+  },
+  {
+    match: /^\/refunds$/,
+    seo: {
+      title: 'Refund Policy — ClientRegit',
+      description: 'ClientRegit refund policy for monthly, yearly, lifetime and team plans.',
+      index: true
+    }
+  },
   { match: /^\/auth$/, seo: { title: 'Sign In or Create an Account — ClientRegit' } },
   { match: /^\/reset-password$/, seo: { title: 'Reset Your Password — ClientRegit' } },
   { match: /^\/checkout\//, seo: { title: 'Checkout — ClientRegit' } },
@@ -55,7 +77,10 @@ export function useSeo(): void {
     setCanonical(url)
     setMeta('property', 'og:url', url)
     setMeta('property', 'og:title', seo.title)
-    if (seo.description) setMeta('name', 'description', seo.description)
+    if (seo.description) {
+      setMeta('name', 'description', seo.description)
+      setMeta('property', 'og:description', seo.description)
+    }
     setMeta('name', 'robots', seo.index === true ? 'index, follow, max-image-preview:large' : 'noindex, nofollow')
   }, [pathname])
 }

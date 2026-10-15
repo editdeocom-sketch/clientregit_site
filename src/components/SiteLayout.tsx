@@ -37,7 +37,7 @@ export function SiteLayout(): ReactNode {
     <div className="flex min-h-screen flex-col">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-gold focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-gold-btn focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
       >
         Skip to content
       </a>
@@ -45,7 +45,7 @@ export function SiteLayout(): ReactNode {
       <header className="sticky top-0 z-40 border-b border-line bg-canvas/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
           <Link to="/" className="flex items-center gap-2.5" onClick={() => setMenuOpen(false)}>
-            <img src="/logo-emblem.png" alt="" className="h-8 w-8 object-contain" />
+            <img src="/logo-emblem.webp" alt="" className="h-8 w-8 object-contain" />
             <span className="text-lg font-bold tracking-tight">{SITE.name}</span>
           </Link>
 
@@ -71,7 +71,7 @@ export function SiteLayout(): ReactNode {
                   onClick={() => setCurrency(code)}
                   aria-pressed={currency === code}
                   className={`cursor-pointer px-2.5 py-1.5 transition-colors ${
-                    currency === code ? 'bg-gold text-white' : 'bg-surface text-muted hover:text-ink'
+                    currency === code ? 'bg-gold-btn text-white' : 'bg-surface text-muted hover:text-ink'
                   }`}
                 >
                   {code}
@@ -81,14 +81,14 @@ export function SiteLayout(): ReactNode {
             {session ? (
               <Link
                 to="/account"
-                className="rounded-lg bg-gold px-3.5 py-2 text-sm font-medium text-white hover:bg-gold-strong"
+                className="rounded-lg bg-gold-btn px-3.5 py-2 text-sm font-medium text-white hover:bg-gold-strong"
               >
                 Account
               </Link>
             ) : (
               <Link
                 to="/auth"
-                className="rounded-lg bg-gold px-3.5 py-2 text-sm font-medium text-white hover:bg-gold-strong"
+                className="rounded-lg bg-gold-btn px-3.5 py-2 text-sm font-medium text-white hover:bg-gold-strong"
               >
                 Sign in
               </Link>
@@ -159,7 +159,7 @@ export function SiteLayout(): ReactNode {
           <div className="grid gap-10 md:grid-cols-3">
             <div>
               <div className="flex items-center gap-2.5">
-                <img src="/logo-emblem.png" alt="" className="h-7 w-7 object-contain" />
+                <img src="/logo-emblem.webp" alt="" className="h-7 w-7 object-contain" />
                 <span className="font-bold">{SITE.name}</span>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-muted">

@@ -295,7 +295,7 @@ export function Checkout(): ReactNode {
           type="button"
           onClick={() => void pay()}
           disabled={busy}
-          className="mt-6 w-full cursor-pointer rounded-lg bg-gold px-4 py-3 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
+          className="mt-6 w-full cursor-pointer rounded-lg bg-gold-btn px-4 py-3 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
         >
           {busy
             ? total === 0

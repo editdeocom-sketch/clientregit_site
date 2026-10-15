@@ -82,7 +82,7 @@ export function ResetPassword(): ReactNode {
           </p>
           <Link
             to="/auth"
-            className="mt-5 inline-block rounded-lg bg-gold px-4 py-2.5 text-sm font-semibold text-white hover:bg-gold-strong"
+            className="mt-5 inline-block rounded-lg bg-gold-btn px-4 py-2.5 text-sm font-semibold text-white hover:bg-gold-strong"
           >
             Back to sign in
           </Link>
@@ -150,7 +150,7 @@ export function ResetPassword(): ReactNode {
           <button
             type="submit"
             disabled={busy}
-            className="w-full cursor-pointer rounded-lg bg-gold px-4 py-2.5 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
+            className="w-full cursor-pointer rounded-lg bg-gold-btn px-4 py-2.5 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
           >
             {busy ? 'Updating…' : 'Update password'}
           </button>

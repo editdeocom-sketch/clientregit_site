@@ -18,13 +18,13 @@ export function Demo(): ReactNode {
           <div className="grid gap-5 md:grid-cols-5">
             <div className="md:col-span-3">
               <ShotFrame
-                src="/shots/dashboard.png"
+                src="/shots/dashboard.webp"
                 alt="ClientRegit dashboard with revenue overview and active projects"
                 label="Dashboard"
               />
             </div>
             <div className="grid gap-5 md:col-span-2">
-              <ShotFrame src="/shots/notifications.png" alt="ClientRegit notification settings" label="Notifications" />
+              <ShotFrame src="/shots/notifications.webp" alt="ClientRegit notification settings" label="Notifications" />
             </div>
           </div>
           <p className="mt-5 text-center text-xs text-muted">

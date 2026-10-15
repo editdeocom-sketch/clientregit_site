@@ -14,7 +14,7 @@ export function FinalCta(): ReactNode {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
             href={DOWNLOADS.windows}
-            className="rounded-lg bg-gold px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gold-strong"
+            className="rounded-lg bg-gold-btn px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gold-strong"
           >
             Download for Windows
           </a>

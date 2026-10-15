@@ -171,7 +171,7 @@ export function Auth(): ReactNode {
     <div className="mx-auto flex max-w-md flex-col px-4 py-16">
       <div className="rounded-2xl border border-line bg-surface p-8 shadow-sm">
         <div className="mb-6 flex flex-col items-center text-center">
-          <img src="/logo-emblem.png" alt="" className="mb-3 h-12 w-12 object-contain" />
+          <img src="/logo-emblem.webp" alt="" className="mb-3 h-12 w-12 object-contain" />
           <h1 className="text-xl font-bold tracking-tight">
             {mode === 'signin' ? 'Welcome back' : mode === 'forgot' ? 'Reset your password' : 'Create your account'}
           </h1>
@@ -237,7 +237,7 @@ export function Auth(): ReactNode {
               type="button"
               onClick={() => void verifyOtp()}
               disabled={otpBusy}
-              className="w-full cursor-pointer rounded-lg bg-gold px-4 py-2.5 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
+              className="w-full cursor-pointer rounded-lg bg-gold-btn px-4 py-2.5 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
             >
               {otpBusy ? 'Verifying…' : 'Verify & create account'}
             </button>
@@ -389,7 +389,7 @@ export function Auth(): ReactNode {
           <button
             type="submit"
             disabled={busy}
-            className="w-full cursor-pointer rounded-lg bg-gold px-4 py-2.5 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
+            className="w-full cursor-pointer rounded-lg bg-gold-btn px-4 py-2.5 text-sm font-semibold text-white hover:bg-gold-strong disabled:opacity-50"
           >
             {busy
               ? 'Please wait…'
