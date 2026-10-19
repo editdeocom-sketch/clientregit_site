@@ -8,8 +8,8 @@ interface Entry {
 
 const ENTRIES: Entry[] = [
   {
-    version: 'Unreleased',
-    date: 'In development',
+    version: '1.4.0',
+    date: '19 October 2026',
     items: [
       'Cloud sync for individual accounts — sign in and sync clients, projects, invoices (with items and payments) and tasks; last edit wins.',
       'Automatic JSON backups — off, daily or weekly, keeping the 7 most recent backups in a folder you choose.',
