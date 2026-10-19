@@ -1,5 +1,6 @@
 import crypto from 'node:crypto'
 import { HttpError, readJsonBody, requirePost, type HandlerRequest, type HandlerResponse } from './_lib/http.js'
+import { assertIpRate } from './_lib/ratelimit.js'
 import { supabaseAdmin } from './_lib/supabase.js'
 import { assertSendAllowed, discardUnconsumedCodes, normalizeEmail } from './_lib/otp.js'
 import { sendResetEmail } from './_lib/mail.js'
@@ -11,6 +12,7 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
       res.status(204).json({})
       return
     }
+    assertIpRate(req, 'pw-reset', 8)
     const body = await readJsonBody(req)
     const email = normalizeEmail(typeof body.email === 'string' ? body.email : '')
     await assertSendAllowed(email)

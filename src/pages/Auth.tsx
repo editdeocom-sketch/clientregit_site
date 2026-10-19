@@ -19,6 +19,37 @@ async function postJson(path: string, payload: unknown): Promise<void> {
   if (!response.ok) throw new Error(json.error ?? 'Request failed — please try again.')
 }
 
+// Client-side lockout after repeated failed password attempts. Works together
+// with Supabase's own server-side rate limits: this stops rapid guessing from
+// one browser session and shows the user a clear cooldown.
+const LOCK_KEY = 'cr.signin.lock'
+
+function readSignInLock(): { fails: number; until: number } {
+  try {
+    const raw = sessionStorage.getItem(LOCK_KEY)
+    if (!raw) return { fails: 0, until: 0 }
+    const parsed = JSON.parse(raw) as { fails?: unknown; until?: unknown }
+    return { fails: Number(parsed.fails) || 0, until: Number(parsed.until) || 0 }
+  } catch {
+    return { fails: 0, until: 0 }
+  }
+}
+
+function lockRemainingSec(): number {
+  const { until } = readSignInLock()
+  return until > Date.now() ? Math.ceil((until - Date.now()) / 1000) : 0
+}
+
+function recordSignInFailure(): void {
+  const fails = readSignInLock().fails + 1
+  const until = fails >= 5 ? Date.now() + Math.min(60 * 2 ** (fails - 5), 600) * 1000 : 0
+  sessionStorage.setItem(LOCK_KEY, JSON.stringify({ fails, until }))
+}
+
+function clearSignInLock(): void {
+  sessionStorage.removeItem(LOCK_KEY)
+}
+
 function EyeIcon({ off }: { off: boolean }): ReactNode {
   return off ? (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -105,13 +136,24 @@ export function Auth(): ReactNode {
           })
         }, 1000)
       } else {
+        const wait = lockRemainingSec()
+        if (wait > 0) {
+          throw new Error(`Too many failed attempts — try again in ${wait} seconds.`)
+        }
         const { error } = await supabase().auth.signInWithPassword({ email, password })
         if (error) {
           if (/invalid login credentials/i.test(error.message)) {
-            throw new Error('Incorrect email or password.')
+            recordSignInFailure()
+            const lockedFor = lockRemainingSec()
+            throw new Error(
+              lockedFor > 0
+                ? `Incorrect email or password. Too many failed attempts — locked for ${lockedFor} seconds.`
+                : 'Incorrect email or password.'
+            )
           }
           throw error
         }
+        clearSignInLock()
         navigate(next, { replace: true })
       }
     } catch (err) {
@@ -132,8 +174,14 @@ export function Auth(): ReactNode {
       await postJson('/api/otp-verify', { email: email.trim(), code: otpCode.trim() })
       const { data } = await supabase().auth.getSession()
       if (!data.session) {
+        const wait = lockRemainingSec()
+        if (wait > 0) throw new Error(`Too many failed attempts — try again in ${wait} seconds.`)
         const { error } = await supabase().auth.signInWithPassword({ email: email.trim(), password })
-        if (error) throw error
+        if (error) {
+          recordSignInFailure()
+          throw error
+        }
+        clearSignInLock()
       }
       navigate(next, { replace: true })
     } catch (err) {

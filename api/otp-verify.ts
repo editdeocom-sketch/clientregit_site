@@ -1,4 +1,5 @@
 import { HttpError, readJsonBody, requirePost, type HandlerRequest, type HandlerResponse } from './_lib/http.js'
+import { assertIpRate } from './_lib/ratelimit.js'
 import { markEmailVerified, normalizeEmail, verifyCode } from './_lib/otp.js'
 import { sendWelcomeEmail } from './_lib/mail.js'
 import { supabaseAdmin } from './_lib/supabase.js'
@@ -10,6 +11,7 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
       res.status(204).json({})
       return
     }
+    assertIpRate(req, 'otp-verify', 30)
     const body = await readJsonBody(req)
     const email = normalizeEmail(typeof body.email === 'string' ? body.email : '')
     const code = typeof body.code === 'string' ? body.code.trim() : ''

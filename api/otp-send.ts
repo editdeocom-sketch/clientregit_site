@@ -1,4 +1,5 @@
 import { HttpError, readJsonBody, requirePost, type HandlerRequest, type HandlerResponse } from './_lib/http.js'
+import { assertIpRate } from './_lib/ratelimit.js'
 import {
   assertSendAllowed,
   discardUnconsumedCodes,
@@ -15,6 +16,7 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
       res.status(204).json({})
       return
     }
+    assertIpRate(req, 'otp-send', 10)
     const body = await readJsonBody(req)
     const email = normalizeEmail(typeof body.email === 'string' ? body.email : '')
     await assertSendAllowed(email)
