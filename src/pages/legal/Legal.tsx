@@ -131,13 +131,15 @@ export function Privacy(): ReactNode {
 
       <H3>1.5 Technical Information</H3>
       <P>
-        Depending on the services and features enabled, we or our service providers may process limited technical
-        information such as application version, operating system, authentication events, license-validation requests,
-        synchronization timestamps, and error information needed for troubleshooting and security.
+        When features are used, limited technical information may be processed by the services involved, such as
+        application version, operating system, authentication events, license-validation requests, synchronization
+        timestamps, and error information needed for troubleshooting and security. For example, license checks send a
+        device identifier and your account email so activation and seat limits can be enforced.
       </P>
       <P>
-        We do not assume that analytics or crash-reporting services are enabled unless they are actually implemented in
-        the application.
+        ClientRegit does not include analytics services, crash-reporting services, advertising trackers, or tracking
+        cookies — neither in the desktop application nor on this website. Diagnostic logs written by the desktop
+        application stay on your own computer as local files; they are not uploaded to us.
       </P>
 
       <H2>2. Where Your Information Is Stored</H2>
@@ -393,8 +395,8 @@ export function Terms(): ReactNode {
         USD, as applicable.
       </P>
       <P>
-        For eligible transactions in India, applicable GST and other taxes will be calculated and displayed as required
-        at checkout. The final payable amount is the amount shown before you confirm payment.
+        ClientRegit does not currently add GST or other taxes to listed prices at checkout. The price shown on the
+        pricing page and at checkout is the amount charged, and the invoice reflects that amount.
       </P>
       <P>
         Payments may be processed by Razorpay or another payment provider made available at checkout. Your payment may
@@ -469,19 +471,15 @@ export function Terms(): ReactNode {
         does not limit rights that cannot legally be excluded.
       </P>
 
-      <H2>10. Invoices, GST, and Business Records</H2>
+      <H2>10. Invoices and Business Records</H2>
       <P>
         ClientRegit provides tools for preparing invoices, calculating amounts, recording payments, and displaying tax
         calculations.
       </P>
       <P>
         These tools are for administrative assistance. You are responsible for checking invoice accuracy, tax rates,
-        GST applicability, invoice numbering, required disclosures, accounting records, and compliance with laws that
-        apply to your business.
-      </P>
-      <P>
-        The availability of an 18% GST calculation does not mean that every transaction is subject to that rate. Seek
-        advice from a qualified tax professional when necessary.
+        invoice numbering, required disclosures, accounting records, and compliance with laws that apply to your
+        business. Seek advice from a qualified tax professional when necessary.
       </P>
       <P>ClientRegit does not provide legal, tax, or accounting advice.</P>
 
@@ -669,10 +667,14 @@ export function Refunds(): ReactNode {
         law.
       </P>
 
-      <H2>6. Taxes and GST</H2>
+      <H2>6. Taxes</H2>
       <P>
-        Where a refund is issued for a purchase that included GST or other taxes, the refund and any corresponding
-        tax-document adjustments will be handled in accordance with applicable law and the original transaction.
+        Prices are charged as displayed — ClientRegit does not currently add GST or other taxes at checkout. If taxes
+        ever become applicable to a purchase, any tax will be shown separately before payment and on your invoice.
+      </P>
+      <P>
+        Where a refund is issued for a purchase that included taxes, the refund and any corresponding tax-document
+        adjustments will be handled in accordance with applicable law and the original transaction.
       </P>
       <P>
         The final amount returned may depend on the transaction and legal requirements. We will not retain an amount

@@ -200,6 +200,9 @@ export function SiteLayout(): ReactNode {
                 <Link to="/refunds" className="hover:text-ink">
                   Refunds
                 </Link>
+                <Link to="/changelog" className="hover:text-ink">
+                  Changelog
+                </Link>
               </div>
             </div>
           </div>

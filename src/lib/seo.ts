@@ -43,7 +43,16 @@ const ROUTES: Array<{ match: RegExp; seo: RouteSeo }> = [
   { match: /^\/reset-password$/, seo: { title: 'Reset Your Password — ClientRegit' } },
   { match: /^\/checkout\//, seo: { title: 'Checkout — ClientRegit' } },
   { match: /^\/account/, seo: { title: 'My Account — ClientRegit' } },
-  { match: /^\/admin/, seo: { title: 'Admin — ClientRegit' } }
+  { match: /^\/admin/, seo: { title: 'Admin — ClientRegit' } },
+  {
+    match: /^\/changelog$/,
+    seo: {
+      title: 'What’s New — ClientRegit',
+      description:
+        'Release notes for ClientRegit: cloud sync, automatic backups, Google Meet, team workspaces and more.',
+      index: true
+    }
+  }
 ]
 
 function setMeta(attr: 'name' | 'property', key: string, content: string): void {

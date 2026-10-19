@@ -64,11 +64,11 @@ async function main(): Promise<void> {
   const { data: lifetimePlan } = await admin.from('plans').select('price_inr, price_per_seat_inr, seats').eq('id', 'lifetime').single()
   const planSeats = Number(lifetimePlan?.seats ?? 1) > 1 ? Number(lifetimePlan?.seats) : 1
   const expectedSubtotal = Number(lifetimePlan?.price_inr ?? 0) + Math.max(0, planSeats - 1) * Number(lifetimePlan?.price_per_seat_inr ?? 0)
-  const expectedTotal = Math.round(expectedSubtotal * 1.18)
+  const expectedTotal = expectedSubtotal
   const order = await post('/api/create-order', { planId: 'lifetime', currency: 'INR' }, tokenA)
   check('create-order 200', order.status === 200, JSON.stringify(order.json).slice(0, 160))
   check('mock order id', typeof order.json.orderId === 'string' && order.json.orderId.startsWith('order_mock_'), order.json.orderId)
-  check(`amount incl 18% GST = ${expectedTotal} paise`, order.json.amount === expectedTotal, `got ${order.json.amount}`)
+  check(`amount = subtotal (no GST) = ${expectedTotal} paise`, order.json.amount === expectedTotal, `got ${order.json.amount}`)
   check('mock flag true', order.json.mock === true)
 
   console.log('--- 3. verify-payment fulfills license ---')

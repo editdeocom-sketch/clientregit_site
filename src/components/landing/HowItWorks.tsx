@@ -6,7 +6,7 @@ const STEPS: Array<{ n: string; title: string; body: string }> = [
   { n: '02', title: 'Add your clients', body: 'Type in the clients you already work with: contacts, notes, rates. Search and tags keep the list usable as it grows.' },
   { n: '03', title: 'Create a project', body: 'Give it a status, deadline and quoted amount. Move it along the pipeline as the job progresses.' },
   { n: '04', title: 'Track tasks & files', body: 'Break the job into to-dos and link the folders you already use for footage, project files and exports.' },
-  { n: '05', title: 'Invoice & record payments', body: 'Bill with a GST-ready invoice, print or export a PDF, and log payments as they come in.' }
+  { n: '05', title: 'Invoice & record payments', body: 'Bill with a tax-ready invoice, print or export a PDF, and log payments as they come in.' }
 ]
 
 export function HowItWorks(): ReactNode {

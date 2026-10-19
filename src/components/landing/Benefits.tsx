@@ -5,7 +5,7 @@ const BENEFITS: Array<{ title: string; body: string }> = [
   { title: 'Client database', body: 'Contacts, notes, tags and lifetime totals — searchable in a second.' },
   { title: 'Project pipeline', body: 'Enquiry to delivered, with priorities, quotes and deadlines in one view.' },
   { title: 'Tasks & files', body: 'To-dos per project plus links to the folders you already use on disk.' },
-  { title: 'GST-ready invoices', body: 'Line items, tax, discounts, payment history — print or PDF.' },
+  { title: 'Tax-ready invoices', body: 'Line items, tax, discounts, payment history — print or PDF.' },
   { title: 'Calendar & reports', body: 'Upcoming deadlines and monthly revenue without opening a spreadsheet.' },
   { title: 'Runs on your PC', body: 'A true desktop app. Your business data stays local, with account sync and JSON backup.' }
 ]

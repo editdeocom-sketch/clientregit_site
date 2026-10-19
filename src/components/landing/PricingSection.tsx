@@ -47,11 +47,10 @@ function PlanCard({ plan, currency }: { plan: SitePlan; currency: 'INR' | 'USD' 
         {compare !== null && compare > price.subtotal && (
           <span className="line-through">{formatMoney(compare, currency)}</span>
         )}
-        {currency === 'INR' && <span>+ 18% GST ({formatMoney(price.tax, currency)})</span>}
       </div>
       <ul className="mt-5 space-y-2 text-sm">
         <li>✓ All features, all updates</li>
-        {isTeam && <li>✓ Up to {plan.seats} members</li>}
+        {isTeam && <li>✓ Up to {plan.seats} computers</li>}
         <li>
           ✓{' '}
           {plan.licenseType === 'perpetual'
@@ -60,7 +59,8 @@ function PlanCard({ plan, currency }: { plan: SitePlan; currency: 'INR' | 'USD' 
         </li>
         {isTeam && plan.pricePerSeat[currency] > 0 && (
           <li className="text-muted">
-            +1 member: {formatMoney(plan.pricePerSeat[currency], currency)} one-time
+            +1 member: {formatMoney(plan.pricePerSeat[currency], currency)} /month — lasts until the
+            plan term ends
           </li>
         )}
         <li>✓ Email support</li>
@@ -90,6 +90,24 @@ export function PricingSection(): ReactNode {
       ? null
       : plans.filter((plan) => plan.active && (tab === 'individual' ? plan.seats <= 1 : plan.seats > 1))
 
+  const team5 = plans?.find((plan) => plan.id === 'team-5')
+  const team8 = plans?.find((plan) => plan.id === 'team-8')
+  let teamValueNote: ReactNode = null
+  if (team5 && team8) {
+    const fivePlusThree = quotePlan(team5, currency, 3).subtotal
+    const eight = quotePlan(team8, currency).subtotal
+    teamValueNote =
+      fivePlusThree > eight
+        ? ` Team 8 (${formatMoney(eight, currency)}/month) costs ${formatMoney(
+            fivePlusThree - eight,
+            currency
+          )} less than Team 5 plus 3 extra members (${formatMoney(
+            fivePlusThree,
+            currency
+          )}/month) — same 8 computers, simpler billing.`
+        : ''
+  }
+
   return (
     <section id="pricing" className="border-b border-line bg-surface py-20">
       <div className="mx-auto max-w-6xl px-4">
@@ -99,7 +117,7 @@ export function PricingSection(): ReactNode {
             Take a lifetime license or a cancel-anytime subscription. Every download starts with a 7-day free trial —
             no card needed.
             {currency === 'INR'
-              ? ' Prices below are before GST — 18% GST is added at checkout.'
+              ? ' Prices are final — no GST is added at checkout.'
               : ' USD pricing for customers outside India.'}
           </p>
 
@@ -124,9 +142,12 @@ export function PricingSection(): ReactNode {
             ))}
           </div>
           {tab === 'team' && (
-            <p className="mx-auto mt-3 max-w-xl text-sm text-muted">
-              One license key for the whole crew — activate on 5, 8 or 10 computers depending on the plan. Extra
-              members ₹299 / $5 each.
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-muted">
+              One license key for the whole crew — activate on 5, 8 or 10 computers. Extra members cost{' '}
+              {team5 ? formatMoney(team5.pricePerSeat[currency], currency) : '₹1,299 / $5'} each per month, added from
+              your account to your existing key. Extra seats last for the rest of your current subscription term (they
+              do not extend it), and you can add up to 50 at a time.{' '}
+              <span className="text-ink">{teamValueNote}</span>
             </p>
           )}
         </div>

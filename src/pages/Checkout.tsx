@@ -215,16 +215,15 @@ export function Checkout(): ReactNode {
                 </span>
                 <span>−{formatMoney(discount, currency)}</span>
               </div>
-              {taxPercent > 0 && <div className="text-xs text-muted">GST is calculated on the discounted price.</div>}
+              {taxPercent > 0 && <div className="text-xs text-muted">Tax is calculated on the discounted price.</div>}
             </>
           )}
           {taxPercent > 0 && (
             <>
               <div className="flex items-center justify-between text-muted">
-                <span>GST @ {taxPercent}%</span>
+                <span>Tax @ {taxPercent}%</span>
                 <span>{formatMoney(tax, currency)}</span>
               </div>
-              <div className="text-xs text-muted">CGST 9% + SGST 9%, shown on your invoice</div>
             </>
           )}
           <div className="flex items-center justify-between border-t border-line pt-3 text-base font-bold">

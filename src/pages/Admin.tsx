@@ -618,7 +618,7 @@ function PlanForm({
           </label>
         )}
         <label className="block">
-          <span className="text-xs font-medium text-muted">Price ₹ (before GST)</span>
+          <span className="text-xs font-medium text-muted">Price ₹</span>
           <input
             value={form.priceInr}
             onChange={(e) => set('priceInr', e.target.value)}
@@ -786,7 +786,7 @@ function PlansTab(): ReactNode {
     <div className="mt-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted">
-          Plans shown on the pricing page and sold at checkout. Prices are before GST.
+          Plans shown on the pricing page and sold at checkout. Prices are charged as displayed — no GST is added.
         </p>
         <button
           onClick={() => {

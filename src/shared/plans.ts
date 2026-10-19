@@ -1,7 +1,7 @@
 export type CurrencyCode = 'INR' | 'USD'
 export type LicenseType = 'perpetual' | 'subscription'
 
-/** Kept as a plain string alias — plan ids come from the database now. */
+/** Kept as a plain string alias â€” plan ids come from the database now. */
 export type PlanId = string
 
 export interface SitePlan {
@@ -24,7 +24,7 @@ export interface SitePlan {
   compareAt: Record<CurrencyCode, number | null>
 }
 
-/** Seed values — used as a client fallback only if the plans table is unreachable. */
+/** Seed values â€” used as a client fallback only if the plans table is unreachable. */
 export const FALLBACK_PLANS: SitePlan[] = [
   {
     id: 'monthly',
@@ -43,7 +43,7 @@ export const FALLBACK_PLANS: SitePlan[] = [
   {
     id: 'yearly',
     name: 'Yearly',
-    blurb: 'Full access for a year — one payment instead of twelve.',
+    blurb: 'Full access for a year â€” one payment instead of twelve.',
     licenseType: 'subscription',
     months: 12,
     prices: { INR: 159900, USD: 1400 },
@@ -71,7 +71,7 @@ export const FALLBACK_PLANS: SitePlan[] = [
   {
     id: 'team-5',
     name: 'Team 5',
-    blurb: 'For small crews — full access on up to 5 computers. Billed monthly.',
+    blurb: 'For small crews â€” full access on up to 5 computers. Billed monthly.',
     licenseType: 'subscription',
     months: 1,
     prices: { INR: 69900, USD: 900 },
@@ -79,13 +79,13 @@ export const FALLBACK_PLANS: SitePlan[] = [
     sortOrder: 4,
     highlight: false,
     seats: 5,
-    pricePerSeat: { INR: 29900, USD: 500 },
+    pricePerSeat: { INR: 129900, USD: 500 },
     compareAt: { INR: 99900, USD: 1200 }
   },
   {
     id: 'team-8',
     name: 'Team 8',
-    blurb: 'Growing studios — full access on up to 8 computers. Billed monthly.',
+    blurb: 'Growing studios â€” full access on up to 8 computers. Billed monthly.',
     licenseType: 'subscription',
     months: 1,
     prices: { INR: 199900, USD: 2400 },
@@ -93,13 +93,13 @@ export const FALLBACK_PLANS: SitePlan[] = [
     sortOrder: 5,
     highlight: true,
     seats: 8,
-    pricePerSeat: { INR: 29900, USD: 500 },
+    pricePerSeat: { INR: 129900, USD: 500 },
     compareAt: { INR: 299900, USD: 3200 }
   },
   {
     id: 'team-10',
     name: 'Team 10',
-    blurb: 'Full studio seat — up to 10 computers for a year.',
+    blurb: 'Full studio seat â€” up to 10 computers for a year.',
     licenseType: 'subscription',
     months: 12,
     prices: { INR: 1799900, USD: 19900 },
@@ -107,17 +107,20 @@ export const FALLBACK_PLANS: SitePlan[] = [
     sortOrder: 6,
     highlight: false,
     seats: 10,
-    pricePerSeat: { INR: 29900, USD: 500 },
+    pricePerSeat: { INR: 129900, USD: 500 },
     compareAt: { INR: 3599900, USD: 39900 }
   }
 ]
 
-/** Indian GST applied to INR prices (exclusive display). */
-export const GST_PERCENT = 18
+/**
+ * No GST is added at checkout â€” prices are charged as displayed.
+ * Kept (as 0) so order rows, invoices and quotes stay schema-compatible.
+ */
+export const GST_PERCENT = 0
 
 export interface PriceQuote {
   currency: CurrencyCode
-  /** before tax, minor units — base plan + extra seats */
+  /** before tax, minor units â€” base plan + extra seats */
   subtotal: number
   taxPercent: number
   /** tax amount, minor units (0 for USD) */

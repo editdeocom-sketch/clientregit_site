@@ -28,10 +28,10 @@ const ROWS: Array<{
   },
   {
     title: 'Invoices & payments',
-    body: 'Build a clean invoice from your business details in seconds — GST-ready for Indian customers.',
+    body: 'Build a clean invoice from your business details in seconds — tax-ready for any country.',
     bullets: ['Line items, quantities and rates', 'Tax percentage and discounts calculated for you', 'Payment ledger per invoice', 'Print or save as PDF'],
     src: '/shots/invoice.webp',
-    alt: 'ClientRegit invoice editor with line items, 18% GST and payment recording',
+    alt: 'ClientRegit invoice editor with line items, tax and payment recording',
     label: 'Invoice'
   },
   {

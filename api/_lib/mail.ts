@@ -131,7 +131,7 @@ export async function sendPurchaseEmail(p: PurchaseEmailParams): Promise<void> {
     ['Plan', escapeHtml(p.planName)],
     ['Date', new Date(p.paidAt).toUTCString()],
     ['Subtotal', money(p.subtotal)],
-    ...(p.taxAmount > 0 ? ([['GST', `${money(p.taxAmount)} (${p.taxPercent}%)`]] as string[][]) : []),
+    ...(p.taxAmount > 0 ? ([['Tax', `${money(p.taxAmount)} (${p.taxPercent}%)`]] as string[][]) : []),
     ...(p.discount > 0 ? ([['Discount', `− ${money(p.discount)}${p.coupon ? ` (${escapeHtml(p.coupon)})` : ''}`]] as string[][]) : [])
   ]
   const tableRows = rows

@@ -24,12 +24,12 @@ const FAQ: Array<{ q: string; a: string }> = [
     a: 'Buy a plan here, sign in to your account, and copy your license key (CRIT-…). Open ClientRegit → sign in with the same email and paste the key. Lifetime plans never expire.'
   },
   {
-    q: 'Do you charge GST?',
-    a: 'Prices shown for India are before GST — 18% GST is added at checkout and shown on your invoice. Customers outside India pay in USD with no GST.'
+    q: 'Do you add GST?',
+    a: 'No. The price you see is the price you pay — GST is not added at checkout. Customers outside India pay in USD.'
   },
   {
     q: 'Can I use one license on multiple computers?',
-    a: 'Individual plans cover one computer. Team plans come with seats — one key works on up to 5, 8 or 10 machines. Need more members? Add seats from your account for ₹299 / $5 each, and they stay added for good.'
+    a: 'Individual plans cover one computer. Team plans come with seats — one key works on up to 5, 8 or 10 machines. Need more members? Add seats from your account for ₹1,299 / $5 each per month; extra seats last for the rest of your subscription term. Team 8 costs less than Team 5 plus 3 extra seats.'
   },
   {
     q: 'Do Team plans need internet?',
@@ -38,6 +38,10 @@ const FAQ: Array<{ q: string; a: string }> = [
   {
     q: 'Where is my data stored?',
     a: 'In a local database on your own computer. ClientRegit is a desktop app — your client, project and invoice data lives with you. Sign in with your account to sync it across your computers; team workspace data (if you use one) and the optional Google account link also go online. You can export a JSON backup or CSV at any time.'
+  },
+  {
+    q: 'How do I turn on Cloud sync?',
+    a: 'Sign in with your ClientRegit account inside the app, open Settings, and switch on Cloud sync. Clients, projects, invoices (with line items and payments) and tasks then sync automatically in the background — plus a Sync now button. The most recent edit wins. Settings and local files stay on each computer.'
   },
   {
     q: 'Does it work offline?',

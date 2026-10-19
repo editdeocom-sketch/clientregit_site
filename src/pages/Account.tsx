@@ -233,19 +233,13 @@ function InvoiceView({
               </tr>
             )}
             {order.tax_percent > 0 && (
-              <>
-                <tr>
-                  <td className="py-1.5 text-gray-600">CGST @ 9%</td>
-                  <td className="py-1.5 text-right">{formatMoney(Math.round(order.tax_amount / 2), order.currency)}</td>
-                </tr>
-                <tr>
-                  <td className="py-1.5 text-gray-600">SGST @ 9%</td>
-                  <td className="py-1.5 text-right">{formatMoney(order.tax_amount - Math.round(order.tax_amount / 2), order.currency)}</td>
-                </tr>
-              </>
+              <tr>
+                <td className="py-1.5 text-gray-600">Tax @ {order.tax_percent}%</td>
+                <td className="py-1.5 text-right">{formatMoney(order.tax_amount, order.currency)}</td>
+              </tr>
             )}
             <tr className="border-t border-gray-300 font-bold">
-              <td className="py-2">Total{order.tax_percent > 0 ? ` (incl. GST @ ${order.tax_percent}%)` : ''}</td>
+              <td className="py-2">Total{order.tax_percent > 0 ? ` (incl. tax)` : ''}</td>
               <td className="py-2 text-right">{formatMoney(order.total, order.currency)}</td>
             </tr>
           </tbody>
@@ -685,7 +679,7 @@ export function Account(): ReactNode {
                       {formatDate(order.paid_at ?? order.created_at)} ·{' '}
                       {formatMoney(order.total, order.currency)}
                       {order.discount_amount > 0 ? ' (discount applied)' : ''}
-                      {order.tax_amount > 0 ? ' (incl. GST)' : ''}
+                      {order.tax_amount > 0 ? ' (incl. tax)' : ''}
                     </p>
                   </div>
                   <button

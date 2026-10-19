@@ -7,7 +7,7 @@ const POINTS: Array<{ title: string; body: string }> = [
   { title: 'Local storage', body: 'Your database lives on your PC. Sign in to sync it to your account across computers.' },
   { title: 'Backups you control', body: 'Export a JSON backup or CSV anytime. Restore on a new machine in minutes.' },
   { title: 'Lifetime or subscription', body: 'Own it forever, or pay monthly or yearly — same features either way.' },
-  { title: 'GST invoices', body: '18% GST applied at checkout for Indian customers, with a proper invoice.' },
+  { title: 'Clear invoices', body: 'Proper invoices with your business details for every payment.' },
   { title: 'Free updates', body: `Every plan includes every update. Currently shipping version ${APP_VERSION}.` }
 ]
 

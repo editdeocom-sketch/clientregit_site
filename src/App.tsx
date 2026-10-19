@@ -13,6 +13,7 @@ const Admin = lazy(() => import('@/pages/Admin').then((m) => ({ default: m.Admin
 const Privacy = lazy(() => import('@/pages/legal/Legal').then((m) => ({ default: m.Privacy })))
 const Terms = lazy(() => import('@/pages/legal/Legal').then((m) => ({ default: m.Terms })))
 const Refunds = lazy(() => import('@/pages/legal/Legal').then((m) => ({ default: m.Refunds })))
+const Changelog = lazy(() => import('@/pages/Changelog').then((m) => ({ default: m.Changelog })))
 
 export function App(): ReactNode {
   useSeo()
@@ -29,6 +30,7 @@ export function App(): ReactNode {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/refunds" element={<Refunds />} />
+          <Route path="/changelog" element={<Changelog />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
